@@ -13,15 +13,31 @@ import {
   Grid,
   Pagination,
   Paper,
+  Tabs,
+  Tab,
 } from '@mui/material';
 
 const DESCRIPTION_PREVIEW_LENGTH = 150; 
+const [activeTab, setActiveTab] = useState(0);
+
+const categories = [
+  'Technology',
+  'Food & Beverage',
+  'Environmental',
+  'Healthcare',
+  'Finance',
+  'Retail',
+  'Education',
+  'Manufacturing',
+  'Energy',
+  'Transportation',
+];
 
 // Generate dummy company data with financial statements
 const companiesData = Array.from({ length: 20 }, (_, i) => ({
   id: i + 1,
   name: `Company ${i + 1}`,
-  category: ['Technology', 'Food & Beverage', 'Environmental'][i % 3],
+  category: categories[i % categories.length],
   size: ['Small', 'Medium', 'Large'][i % 3],
   location: ['San Francisco, CA', 'New York, NY', 'London, UK'][i % 3],
   employees: Math.floor(Math.random() * 1000),
@@ -36,6 +52,12 @@ const companiesData = Array.from({ length: 20 }, (_, i) => ({
     assets: Math.floor(Math.random() * 2000000),
     liabilities: Math.floor(Math.random() * 1000000),
   },
+  founded: `${1980 + (i % 40)}-01-01`,
+  headquarters: ['San Francisco', 'New York', 'London', 'Tokyo'][i % 4],
+  mission: `Our mission is to lead innovation in the ${
+    categories[i % categories.length].toLowerCase()
+  } sector.`,
+  values: ['Integrity', 'Innovation', 'Excellence', 'Collaboration'],
 }));
 
 const COMPANIES_PER_PAGE = 9;
@@ -90,7 +112,6 @@ function App() {
           Back to Directory
         </Button>
         <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>
-          {/* Hero Section */}
           <Box
             sx={{
               display: 'flex',
@@ -123,7 +144,6 @@ function App() {
             </Button>
           </Box>
   
-          {/* About Us Section */}
           <Typography variant="h5" component="div" sx={{ mt: 3, mb: 1 }}>
             About Us
           </Typography>
@@ -139,42 +159,56 @@ function App() {
             </ul>
           </Typography>
   
-          {/* Key Information Section */}
           <Typography variant="h5" component="div" sx={{ mt: 3, mb: 1 }}>
             Key Information
           </Typography>
           <Grid container spacing={2}>
             <Grid item xs={12} sm={6}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                {/* Add Icon */}
                 <Typography variant="body1" sx={{ ml: 1 }}>
                   Category: {selectedCompany.category}
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                {/* Add Icon */}
                 <Typography variant="body1" sx={{ ml: 1 }}>
                   Size: {selectedCompany.size}
+                </Typography>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                <Typography variant="body1" sx={{ ml: 1 }}>
+                  Founded: {selectedCompany.founded}
+                </Typography>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                <Typography variant="body1" sx={{ ml: 1 }}>
+                  Headquarters: {selectedCompany.headquarters}
                 </Typography>
               </Box>
             </Grid>
             <Grid item xs={12} sm={6}>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                {/* Add Icon */}
                 <Typography variant="body1" sx={{ ml: 1 }}>
                   Location: {selectedCompany.location}
                 </Typography>
               </Box>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                {/* Add Icon */}
                 <Typography variant="body1" sx={{ ml: 1 }}>
                   Employees: {selectedCompany.employees}
+                </Typography>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                <Typography variant="body1" sx={{ ml: 1 }}>
+                  Mission: {selectedCompany.mission}
+                </Typography>
+              </Box>
+              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                <Typography variant="body1" sx={{ ml: 1 }}>
+                  Values: {(selectedCompany.values || []).join(', ')}
                 </Typography>
               </Box>
             </Grid>
           </Grid>
   
-          {/* Financials Section */}
           <Typography variant="h5" component="div" sx={{ mt: 3, mb: 1 }}>
             Financial Highlights
           </Typography>
@@ -187,10 +221,8 @@ function App() {
               <Typography variant="body1">Assets: ${selectedCompany.financialStatement.assets}</Typography>
               <Typography variant="body1">Liabilities: ${selectedCompany.financialStatement.liabilities}</Typography>
             </Grid>
-            {/* Add chart or graph here */}
           </Grid>
   
-          {/* Call to Action */}
           <Box sx={{ textAlign: 'center', mt: 4 }}>
             <Button variant="contained" color="primary" size="large">
               Contact Us
@@ -222,11 +254,14 @@ function App() {
       fullWidth
       value={filterCategory}
       onChange={(e) => setFilterCategory(e.target.value)}
+      displayEmpty
     >
-      <MenuItem value="">All Categories</MenuItem>
-      <MenuItem value="Technology">Technology</MenuItem>
-      <MenuItem value="Food & Beverage">Food & Beverage</MenuItem>
-      <MenuItem value="Environmental">Environmental</MenuItem>
+      <MenuItem value="">Select Category</MenuItem> {/* Placeholder */}
+      {categories.map((category) => (
+                    <MenuItem key={category} value={category}>
+                      {category}
+                    </MenuItem>
+                  ))}
     </Select>
   </Grid>
   <Grid item xs={12} sm={6} md={3}>
@@ -234,8 +269,9 @@ function App() {
       fullWidth
       value={filterSize}
       onChange={(e) => setFilterSize(e.target.value)}
+      displayEmpty
     >
-      <MenuItem value="">All Sizes</MenuItem>
+      <MenuItem value="">Select Size</MenuItem> {/* Placeholder */}
       <MenuItem value="Small">Small</MenuItem>
       <MenuItem value="Medium">Medium</MenuItem>
       <MenuItem value="Large">Large</MenuItem>
@@ -246,8 +282,9 @@ function App() {
       fullWidth
       value={filterLocation}
       onChange={(e) => setFilterLocation(e.target.value)}
+      displayEmpty
     >
-      <MenuItem value="">All Locations</MenuItem>
+      <MenuItem value="">Select Location</MenuItem> {/* Placeholder */}
       <MenuItem value="San Francisco, CA">San Francisco, CA</MenuItem>
       <MenuItem value="New York, NY">New York, NY</MenuItem>
       <MenuItem value="London, UK">London, UK</MenuItem>

@@ -13,6 +13,8 @@ import {
   Grid,
   Pagination,
   Paper,
+  Tabs,
+  Tab,
 } from '@mui/material';
 
 const DESCRIPTION_PREVIEW_LENGTH = 150; 
@@ -67,6 +69,8 @@ function App() {
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [page, setPage] = useState(1);
 
+const [activeTab, setActiveTab] = useState(0);
+
   const filteredCompanies = companiesData.filter((company) => {
     const nameMatch = company.name.toLowerCase().includes(searchTerm.toLowerCase());
     let categoryMatch = true;
@@ -98,6 +102,9 @@ function App() {
     setPage(newPage);
   };
 
+  const handleTabChange = (event, newValue) => {
+    setActiveTab(newValue);
+  };
   const startIndex = (page - 1) * COMPANIES_PER_PAGE;
   const endIndex = startIndex + COMPANIES_PER_PAGE;
   const companiesToDisplay = filteredCompanies.slice(startIndex, endIndex);
@@ -109,116 +116,229 @@ function App() {
           Back to Directory
         </Button>
         <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              mb: 3,
-              textAlign: 'center',
-            }}
+           {/* Hero Section (Logo and Name) - Moved outside tabs */}
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            mb: 3,
+            textAlign: 'center',
+          }}
+        >
+          <CardMedia
+            component="img"
+            sx={{ width: 150, height: 150, objectFit: 'contain', mb: 1 }}
+            image={selectedCompany.logo}
+            alt={selectedCompany.name}
+          />
+          <Typography variant="h3" component="div">
+            {selectedCompany.name}
+          </Typography>
+          <Typography variant="subtitle1" color="text.secondary">
+            Innovating for a Better Future
+          </Typography>
+          <Button
+            href={selectedCompany.website}
+            target="_blank"
+            rel="noopener noreferrer"
+            variant="contained"
+            sx={{ mt: 2 }}
           >
-            <CardMedia
-              component="img"
-              sx={{ width: 150, height: 150, objectFit: 'contain', mb: 1 }}
-              image={selectedCompany.logo}
-              alt={selectedCompany.name}
-            />
-            <Typography variant="h3" component="div">
-              {selectedCompany.name}
+            Visit Our Website
+          </Button>
+        </Box>
+  
+          <Tabs value={activeTab} onChange={handleTabChange} aria-label="company tabs">
+            <Tab label="About Us" />
+            <Tab label="Investors" />
+            <Tab label="Assessment" />
+            <Tab label="Transformation Plan" />
+            <Tab label="Careers" />
+          </Tabs>
+  
+          {activeTab === 0 && (
+            <>
+              <Typography variant="h5" component="div" sx={{ mt: 3, mb: 1 }}>
+                About Us
+              </Typography>
+              <Typography variant="body1" sx={{ mb: 2 }}>
+                {selectedCompany.description}
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 2 }}>
+                Key Features:
+                <ul>
+                  <li>Cutting-edge solutions</li>
+                  <li>Dedicated team</li>
+                  <li>Sustainable practices</li>
+                </ul>
+              </Typography>
+  
+              {/* Key Information Section (Moved inside About Us tab) */}
+              <Typography variant="h5" component="div" sx={{ mt: 3, mb: 1 }}>
+                Key Information
+              </Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                    <Typography variant="body1" sx={{ ml: 1 }}>
+                      Category: {selectedCompany.category}
+                    </Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                    <Typography variant="body1" sx={{ ml: 1 }}>
+                      Size: {selectedCompany.size}
+                    </Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                    <Typography variant="body1" sx={{ ml: 1 }}>
+                      Founded: {selectedCompany.founded}
+                    </Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                    <Typography variant="body1" sx={{ ml: 1 }}>
+                      Headquarters: {selectedCompany.headquarters}
+                    </Typography>
+                  </Box>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                    <Typography variant="body1" sx={{ ml: 1 }}>
+                      Location: {selectedCompany.location}
+                    </Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                    <Typography variant="body1" sx={{ ml: 1 }}>
+                      Employees: {selectedCompany.employees}
+                    </Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                    <Typography variant="body1" sx={{ ml: 1 }}>
+                      Mission: {selectedCompany.mission}
+                    </Typography>
+                  </Box>
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                    <Typography variant="body1" sx={{ ml: 1 }}>
+                      Values: {(selectedCompany.values || []).join(', ')}
+                    </Typography>
+                  </Box>
+                </Grid>
+              </Grid>
+  
+              {/* Financial Information Section (Moved inside About Us tab) */}
+              <Typography variant="h5" component="div" sx={{ mt: 3, mb: 1 }}>
+                Financial Highlights
+              </Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="body1">Revenue: ${selectedCompany.financialStatement.revenue}</Typography>
+                  <Typography variant="body1">Profit: ${selectedCompany.financialStatement.profit}</Typography>
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <Typography variant="body1">Assets: ${selectedCompany.financialStatement.assets}</Typography>
+                  <Typography variant="body1">Liabilities: ${selectedCompany.financialStatement.liabilities}</Typography>
+                </Grid>
+              </Grid>
+            </>
+          )}
+  
+          {/* ... (Careers, Investors, Assessment, Transformation Plan tabs) */}
+          {activeTab === 4 && (
+          <>
+            <Typography variant="h5" component="div" sx={{ mt: 3, mb: 1 }}>
+              Careers
             </Typography>
-            <Typography variant="subtitle1" color="text.secondary">
-              Innovating for a Better Future
+            <Typography variant="body1" sx={{ mb: 2 }}>
+              We're always looking for talented individuals to join our team!
             </Typography>
-            <Button
-              href={selectedCompany.website}
-              target="_blank"
-              rel="noopener noreferrer"
-              variant="contained"
-              sx={{ mt: 2 }}
-            >
-              Visit Our Website
-            </Button>
-          </Box>
-  
-          <Typography variant="h5" component="div" sx={{ mt: 3, mb: 1 }}>
-            About Us
-          </Typography>
-          <Typography variant="body1" sx={{ mb: 2 }}>
-            {selectedCompany.description}
-          </Typography>
-          <Typography variant="body2" sx={{ mb: 2 }}>
-            Key Features:
-            <ul>
-              <li>Cutting-edge solutions</li>
-              <li>Dedicated team</li>
-              <li>Sustainable practices</li>
-            </ul>
-          </Typography>
-  
-          <Typography variant="h5" component="div" sx={{ mt: 3, mb: 1 }}>
-            Key Information
-          </Typography>
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                <Typography variant="body1" sx={{ ml: 1 }}>
-                  Category: {selectedCompany.category}
-                </Typography>
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                <Typography variant="body1" sx={{ ml: 1 }}>
-                  Size: {selectedCompany.size}
-                </Typography>
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                <Typography variant="body1" sx={{ ml: 1 }}>
-                  Founded: {selectedCompany.founded}
-                </Typography>
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                <Typography variant="body1" sx={{ ml: 1 }}>
-                  Headquarters: {selectedCompany.headquarters}
-                </Typography>
-              </Box>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                <Typography variant="body1" sx={{ ml: 1 }}>
-                  Location: {selectedCompany.location}
-                </Typography>
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                <Typography variant="body1" sx={{ ml: 1 }}>
-                  Employees: {selectedCompany.employees}
-                </Typography>
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                <Typography variant="body1" sx={{ ml: 1 }}>
-                  Mission: {selectedCompany.mission}
-                </Typography>
-              </Box>
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                <Typography variant="body1" sx={{ ml: 1 }}>
-                  Values: {(selectedCompany.values || []).join(', ')}
-                </Typography>
-              </Box>
-            </Grid>
-          </Grid>
-  
-          <Typography variant="h5" component="div" sx={{ mt: 3, mb: 1 }}>
-            Financial Highlights
-          </Typography>
-          <Grid container spacing={2}>
-            <Grid item xs={12} sm={6}>
-              <Typography variant="body1">Revenue: ${selectedCompany.financialStatement.revenue}</Typography>
-              <Typography variant="body1">Profit: ${selectedCompany.financialStatement.profit}</Typography>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Typography variant="body1">Assets: ${selectedCompany.financialStatement.assets}</Typography>
-              <Typography variant="body1">Liabilities: ${selectedCompany.financialStatement.liabilities}</Typography>
-            </Grid>
-          </Grid>
+            <Typography variant="body2" sx={{ mb: 2 }}>
+              Open Positions:
+              <ul>
+                <li>Senior Software Engineer - Apply <a href="/careers/senior-software-engineer">here</a></li>
+                <li>Marketing Specialist - Apply <a href="/careers/marketing-specialist">here</a></li>
+                <li>Data Analyst - Apply <a href="/careers/data-analyst">here</a></li>
+              </ul>
+            </Typography>
+            <Typography variant="body2" sx={{ mb: 2 }}>
+              Benefits:
+              <ul>
+                <li>Competitive salary and benefits package</li>
+                <li>Flexible work arrangements</li>
+                <li>Opportunities for professional growth</li>
+              </ul>
+            </Typography>
+          </>
+        )}
+
+        {activeTab === 1 && (
+          <>
+            <Typography variant="h5" component="div" sx={{ mt: 3, mb: 1 }}>
+              Investors
+            </Typography>
+            <Typography variant="body1" sx={{ mb: 2 }}>
+              Welcome to our investor relations page.
+            </Typography>
+            <Typography variant="body2" sx={{ mb: 2 }}>
+              Key Investor Highlights:
+              <ul>
+                <li>Annual Report 2023 - Download <a href="/investors/annual-report-2023">here</a></li>
+                <li>Financial Results Q4 2023 - View <a href="/investors/financial-results-q4-2023">here</a></li>
+                <li>Investor Presentations - Access <a href="/investors/presentations">here</a></li>
+              </ul>
+            </Typography>
+            <Typography variant="body2" sx={{ mb: 2 }}>
+              Contact Investor Relations: <a href="mailto:investors@company.com">investors@company.com</a>
+            </Typography>
+          </>
+        )}
+
+        {activeTab === 2 && (
+          <>
+            <Typography variant="h5" component="div" sx={{ mt: 3, mb: 1 }}>
+              Assessment
+            </Typography>
+            <Typography variant="body1" sx={{ mb: 2 }}>
+              Our company undergoes regular assessments to ensure continuous improvement.
+            </Typography>
+            <Typography variant="body2" sx={{ mb: 2 }}>
+              Key Assessment Findings:
+              <ul>
+                <li>Strong market position in the technology sector.</li>
+                <li>Opportunities for improvement in customer satisfaction.</li>
+                <li>Commitment to sustainability and environmental responsibility.</li>
+              </ul>
+            </Typography>
+            <Typography variant="body2" sx={{ mb: 2 }}>
+              Assessment Reports:
+              <ul>
+                <li>Sustainability Report - Download <a href="/assessment/sustainability-report">here</a></li>
+                <li>Customer Satisfaction Report - Download <a href="/assessment/customer-satisfaction-report">here</a></li>
+              </ul>
+            </Typography>
+          </>
+        )}
+
+        {activeTab === 3 && (
+          <>
+            <Typography variant="h5" component="div" sx={{ mt: 3, mb: 1 }}>
+              Transformation Plan
+            </Typography>
+            <Typography variant="body1" sx={{ mb: 2 }}>
+              Our strategic transformation plan is focused on innovation and growth.
+            </Typography>
+            <Typography variant="body2" sx={{ mb: 2 }}>
+              Key Transformation Initiatives:
+              <ul>
+                <li>Digital transformation to enhance customer experience.</li>
+                <li>Expansion into new markets and product lines.</li>
+                <li>Investment in research and development for cutting-edge technologies.</li>
+              </ul>
+            </Typography>
+            <Typography variant="body2" sx={{ mb: 2 }}>
+              Transformation Plan Document - Download <a href="/transformation-plan/document">here</a>
+            </Typography>
+          </>
+        )}
   
           <Box sx={{ textAlign: 'center', mt: 4 }}>
             <Button variant="contained" color="primary" size="large">
