@@ -14,6 +14,8 @@ import {
   Pagination,
 } from '@mui/material';
 
+const DESCRIPTION_PREVIEW_LENGTH = 150; 
+
 // Generate dummy company data with financial statements
 const companiesData = Array.from({ length: 10 }, (_, i) => ({
   id: i + 1,
@@ -22,7 +24,9 @@ const companiesData = Array.from({ length: 10 }, (_, i) => ({
   size: ['Small', 'Medium', 'Large'][i % 3],
   location: ['San Francisco, CA', 'New York, NY', 'London, UK'][i % 3],
   employees: Math.floor(Math.random() * 1000),
-  description: `Description for Company ${i + 1}`,
+  description: `Company ${i + 1} is a dynamic and innovative leader in the ${
+    ['technology', 'food and beverage', 'environmental'][i % 3]
+  } sector. With a strong commitment to excellence and a passion for creating cutting-edge solutions, we empower our clients to achieve their business goals. Our team of experts brings a wealth of experience and expertise to every project, ensuring that we deliver exceptional results that exceed expectations. We are dedicated to building long-lasting relationships with our clients, based on trust, integrity, and mutual respect. Our mission is to make a positive impact on the world through our work, and we strive to be a catalyst for change in our industry. We are committed to sustainability and responsible business practices, and we believe in giving back to our communities. Our values of innovation, collaboration, and customer focus drive everything we do, and we are constantly seeking new ways to improve and grow. We are proud to be a part of the global community and contribute to a better future.`,
   logo: require(`./logos/${i + 1}.jpg`),
   website: `https://company${i + 1}.com`,
   financialStatement: {
@@ -33,7 +37,7 @@ const companiesData = Array.from({ length: 10 }, (_, i) => ({
   },
 }));
 
-const COMPANIES_PER_PAGE = 30;
+const COMPANIES_PER_PAGE = 9;
 
 function App() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -45,9 +49,20 @@ function App() {
 
   const filteredCompanies = companiesData.filter((company) => {
     const nameMatch = company.name.toLowerCase().includes(searchTerm.toLowerCase());
-    const categoryMatch = filterCategory ? company.category === filterCategory : true;
-    const sizeMatch = filterSize ? company.size === filterSize : true;
-    const locationMatch = filterLocation ? company.location === filterLocation : true;
+    let categoryMatch = true;
+    let sizeMatch = true;
+    let locationMatch = true;
+  
+    if (filterCategory) {
+      categoryMatch = company.category === filterCategory;
+    }
+    if (filterSize) {
+      sizeMatch = company.size === filterSize;
+    }
+    if (filterLocation) {
+      locationMatch = company.location === filterLocation;
+    }
+  
     return nameMatch && categoryMatch && sizeMatch && locationMatch;
   });
 
@@ -99,6 +114,7 @@ function App() {
             <Typography variant="body2" color="text.secondary">
               Description: {selectedCompany.description}
             </Typography>
+            <Box sx={{ my: 2 }} /> 
             <Typography variant="h6" component="div">
               Financial Statement:
             </Typography>
@@ -140,39 +156,43 @@ function App() {
           sx={{ mb: 1 }}
         />
         <Grid container spacing={2}>
-          <Grid item xs={12} sm={6} md={3}>
-            <Select
-              fullWidth
-              value={filterCategory}
-              onChange={(e) => setFilterCategory(e.target.value)}
-            >
-              <MenuItem value="">All Categories</MenuItem>
-              <MenuItem value="Technology">Technology</MenuItem>
-              <MenuItem value="Food & Beverage">Food & Beverage</MenuItem>
-              <MenuItem value="Environmental">Environmental</MenuItem>
-            </Select>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <Select fullWidth value={filterSize} onChange={(e) => setFilterSize(e.target.value)}>
-              <MenuItem value="">All Sizes</MenuItem>
-              <MenuItem value="Small">Small</MenuItem>
-              <MenuItem value="Medium">Medium</MenuItem>
-              <MenuItem value="Large">Large</MenuItem>
-            </Select>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <Select
-              fullWidth
-              value={filterLocation}
-              onChange={(e) => setFilterLocation(e.target.value)}
-            >
-              <MenuItem value="">All Locations</MenuItem>
-              <MenuItem value="San Francisco, CA">San Francisco, CA</MenuItem>
-              <MenuItem value="New York, NY">New York, NY</MenuItem>
-              <MenuItem value="London, UK">London, UK</MenuItem>
-            </Select>
-          </Grid>
-        </Grid>
+  <Grid item xs={12} sm={6} md={3}>
+    <Select
+      fullWidth
+      value={filterCategory}
+      onChange={(e) => setFilterCategory(e.target.value)}
+    >
+      <MenuItem value="">All Categories</MenuItem>
+      <MenuItem value="Technology">Technology</MenuItem>
+      <MenuItem value="Food & Beverage">Food & Beverage</MenuItem>
+      <MenuItem value="Environmental">Environmental</MenuItem>
+    </Select>
+  </Grid>
+  <Grid item xs={12} sm={6} md={3}>
+    <Select
+      fullWidth
+      value={filterSize}
+      onChange={(e) => setFilterSize(e.target.value)}
+    >
+      <MenuItem value="">All Sizes</MenuItem>
+      <MenuItem value="Small">Small</MenuItem>
+      <MenuItem value="Medium">Medium</MenuItem>
+      <MenuItem value="Large">Large</MenuItem>
+    </Select>
+  </Grid>
+  <Grid item xs={12} sm={6} md={3}>
+    <Select
+      fullWidth
+      value={filterLocation}
+      onChange={(e) => setFilterLocation(e.target.value)}
+    >
+      <MenuItem value="">All Locations</MenuItem>
+      <MenuItem value="San Francisco, CA">San Francisco, CA</MenuItem>
+      <MenuItem value="New York, NY">New York, NY</MenuItem>
+      <MenuItem value="London, UK">London, UK</MenuItem>
+    </Select>
+  </Grid>
+</Grid>
       </Box>
 
       <Grid container spacing={3}>
@@ -198,6 +218,10 @@ function App() {
                 <Typography variant="body2" color="text.secondary">
                   Revenue: ${company.financialStatement.revenue}
                 </Typography>
+                <Typography variant="body2" color="text.secondary">
+                Description: {company.description.substring(0, DESCRIPTION_PREVIEW_LENGTH)}...
+              </Typography>
+                
               </CardContent>
             </Card>
           </Grid>
