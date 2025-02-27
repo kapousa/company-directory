@@ -14,20 +14,26 @@ import {
   Pagination,
 } from '@mui/material';
 
-// Generate dummy company data
+// Generate dummy company data with financial statements
 const companiesData = Array.from({ length: 10 }, (_, i) => ({
   id: i + 1,
   name: `Company ${i + 1}`,
   category: ['Technology', 'Food & Beverage', 'Environmental'][i % 3],
   size: ['Small', 'Medium', 'Large'][i % 3],
-  location: ['Cairo, Egypt', 'Dubai, UAE', 'London, UK'][i % 3],
+  location: ['San Francisco, CA', 'New York, NY', 'London, UK'][i % 3],
   employees: Math.floor(Math.random() * 1000),
   description: `Description for Company ${i + 1}`,
-  logo: require(`./logos/${i + 1}.jpg`), // Dynamically import logos
+  logo: require(`./logos/${i + 1}.jpg`),
   website: `https://company${i + 1}.com`,
+  financialStatement: {
+    revenue: Math.floor(Math.random() * 1000000),
+    profit: Math.floor(Math.random() * 500000),
+    assets: Math.floor(Math.random() * 2000000),
+    liabilities: Math.floor(Math.random() * 1000000),
+  },
 }));
 
-const COMPANIES_PER_PAGE = 9;
+const COMPANIES_PER_PAGE = 30;
 
 function App() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -93,6 +99,22 @@ function App() {
             <Typography variant="body2" color="text.secondary">
               Description: {selectedCompany.description}
             </Typography>
+            <Typography variant="h6" component="div">
+              Financial Statement:
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Revenue: ${selectedCompany.financialStatement.revenue}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Profit: ${selectedCompany.financialStatement.profit}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Assets: ${selectedCompany.financialStatement.assets}
+            </Typography>
+            <Typography variant="body2" color="text.secondary">
+              Liabilities: ${selectedCompany.financialStatement.liabilities}
+            </Typography>
+
             <Button href={selectedCompany.website} target="_blank" rel="noopener noreferrer" sx={{ mt: 2 }}>
               Visit Website
             </Button>
@@ -145,8 +167,8 @@ function App() {
               onChange={(e) => setFilterLocation(e.target.value)}
             >
               <MenuItem value="">All Locations</MenuItem>
-              <MenuItem value="Cairo, Egypt">Cairo, Egypt</MenuItem>
-              <MenuItem value="Dubai, UAE">Dubai, UAE</MenuItem>
+              <MenuItem value="San Francisco, CA">San Francisco, CA</MenuItem>
+              <MenuItem value="New York, NY">New York, NY</MenuItem>
               <MenuItem value="London, UK">London, UK</MenuItem>
             </Select>
           </Grid>
