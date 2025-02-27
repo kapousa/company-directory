@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 
 // Generate dummy company data with financial statements and long descriptions
-const companiesData = Array.from({ length: 10 }, (_, i) => ({
+const companiesData = Array.from({ length: 9 }, (_, i) => ({
   id: i + 1,
   name: `Company ${i + 1}`,
   category: ['Technology', 'Food & Beverage', 'Environmental'][i % 3],
