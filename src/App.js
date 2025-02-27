@@ -251,8 +251,9 @@ function App() {
       fullWidth
       value={filterCategory}
       onChange={(e) => setFilterCategory(e.target.value)}
+      displayEmpty
     >
-      <MenuItem value="">All Categories</MenuItem>
+      <MenuItem value="">Select Category</MenuItem> {/* Placeholder */}
       {categories.map((category) => (
                     <MenuItem key={category} value={category}>
                       {category}
@@ -265,8 +266,9 @@ function App() {
       fullWidth
       value={filterSize}
       onChange={(e) => setFilterSize(e.target.value)}
+      displayEmpty
     >
-      <MenuItem value="">All Sizes</MenuItem>
+      <MenuItem value="">Select Size</MenuItem> {/* Placeholder */}
       <MenuItem value="Small">Small</MenuItem>
       <MenuItem value="Medium">Medium</MenuItem>
       <MenuItem value="Large">Large</MenuItem>
@@ -277,8 +279,9 @@ function App() {
       fullWidth
       value={filterLocation}
       onChange={(e) => setFilterLocation(e.target.value)}
+      displayEmpty
     >
-      <MenuItem value="">All Locations</MenuItem>
+      <MenuItem value="">Select Location</MenuItem> {/* Placeholder */}
       <MenuItem value="San Francisco, CA">San Francisco, CA</MenuItem>
       <MenuItem value="New York, NY">New York, NY</MenuItem>
       <MenuItem value="London, UK">London, UK</MenuItem>
