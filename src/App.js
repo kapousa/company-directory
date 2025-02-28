@@ -17,7 +17,7 @@ import {
   Tab,
 } from '@mui/material';
 
-const DESCRIPTION_PREVIEW_LENGTH = 150; 
+const DESCRIPTION_PREVIEW_LENGTH = 150;
 
 const categories = [
   'Technology',
@@ -40,9 +40,8 @@ const companiesData = Array.from({ length: 20 }, (_, i) => ({
   size: ['Small', 'Medium', 'Large'][i % 3],
   location: ['San Francisco, CA', 'New York, NY', 'London, UK'][i % 3],
   employees: Math.floor(Math.random() * 1000),
-  description: `Company ${i + 1} is a dynamic and innovative leader in the ${
-    ['technology', 'food and beverage', 'environmental'][i % 3]
-  } sector. With a strong commitment to excellence and a passion for creating cutting-edge solutions, we empower our clients to achieve their business goals. Our team of experts brings a wealth of experience and expertise to every project, ensuring that we deliver exceptional results that exceed expectations. We are dedicated to building long-lasting relationships with our clients, based on trust, integrity, and mutual respect. Our mission is to make a positive impact on the world through our work, and we strive to be a catalyst for change in our industry. We are committed to sustainability and responsible business practices, and we believe in giving back to our communities. Our values of innovation, collaboration, and customer focus drive everything we do, and we are constantly seeking new ways to improve and grow. We are proud to be a part of the global community and contribute to a better future.`,
+  description: `Company ${i + 1} is a dynamic and innovative leader in the ${['technology', 'food and beverage', 'environmental'][i % 3]
+    } sector. With a strong commitment to excellence and a passion for creating cutting-edge solutions, we empower our clients to achieve their business goals. Our team of experts brings a wealth of experience and expertise to every project, ensuring that we deliver exceptional results that exceed expectations. We are dedicated to building long-lasting relationships with our clients, based on trust, integrity, and mutual respect. Our mission is to make a positive impact on the world through our work, and we strive to be a catalyst for change in our industry. We are committed to sustainability and responsible business practices, and we believe in giving back to our communities. Our values of innovation, collaboration, and customer focus drive everything we do, and we are constantly seeking new ways to improve and grow. We are proud to be a part of the global community and contribute to a better future.`,
   logo: require(`./logos/${i + 1}.jpg`),
   website: `https://company${i + 1}.com`,
   financialStatement: {
@@ -53,9 +52,8 @@ const companiesData = Array.from({ length: 20 }, (_, i) => ({
   },
   founded: `${1980 + (i % 40)}-01-01`,
   headquarters: ['San Francisco', 'New York', 'London', 'Tokyo'][i % 4],
-  mission: `Our mission is to lead innovation in the ${
-    categories[i % categories.length].toLowerCase()
-  } sector.`,
+  mission: `Our mission is to lead innovation in the ${categories[i % categories.length].toLowerCase()
+    } sector.`,
   values: ['Integrity', 'Innovation', 'Excellence', 'Collaboration'],
 }));
 
@@ -69,14 +67,14 @@ function App() {
   const [selectedCompany, setSelectedCompany] = useState(null);
   const [page, setPage] = useState(1);
 
-const [activeTab, setActiveTab] = useState(0);
+  const [activeTab, setActiveTab] = useState(0);
 
   const filteredCompanies = companiesData.filter((company) => {
     const nameMatch = company.name.toLowerCase().includes(searchTerm.toLowerCase());
     let categoryMatch = true;
     let sizeMatch = true;
     let locationMatch = true;
-  
+
     if (filterCategory) {
       categoryMatch = company.category === filterCategory;
     }
@@ -86,7 +84,7 @@ const [activeTab, setActiveTab] = useState(0);
     if (filterLocation) {
       locationMatch = company.location === filterLocation;
     }
-  
+
     return nameMatch && categoryMatch && sizeMatch && locationMatch;
   });
 
@@ -116,47 +114,46 @@ const [activeTab, setActiveTab] = useState(0);
           Back to Directory
         </Button>
         <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>
-           {/* Hero Section (Logo and Name) - Moved outside tabs */}
-        <Box
-          sx={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            mb: 3,
-            textAlign: 'center',
-          }}
-        >
-          <CardMedia
-            component="img"
-            sx={{ width: 150, height: 150, objectFit: 'contain', mb: 1 }}
-            image={selectedCompany.logo}
-            alt={selectedCompany.name}
-          />
-          <Typography variant="h3" component="div">
-            {selectedCompany.name}
-          </Typography>
-          <Typography variant="subtitle1" color="text.secondary">
-            Innovating for a Better Future
-          </Typography>
-          <Button
-            href={selectedCompany.website}
-            target="_blank"
-            rel="noopener noreferrer"
-            variant="contained"
-            sx={{ mt: 2 }}
+          {/* Hero Section (Logo and Name) - Moved outside tabs */}
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              mb: 3,
+              textAlign: 'center',
+            }}
           >
-            Visit Our Website
-          </Button>
-        </Box>
-  
+            <CardMedia
+              component="img"
+              sx={{ width: 150, height: 150, objectFit: 'contain', mb: 1 }}
+              image={selectedCompany.logo}
+              alt={selectedCompany.name}
+            />
+            <Typography variant="h3" component="div">
+              {selectedCompany.name}
+            </Typography>
+            <Typography variant="subtitle1" color="text.secondary">
+              Innovating for a Better Future
+            </Typography>
+            <Button
+              href={selectedCompany.website}
+              target="_blank"
+              rel="noopener noreferrer"
+              variant="contained"
+              sx={{ mt: 2 }}
+            >
+              Visit Our Website
+            </Button>
+          </Box>
+
           <Tabs value={activeTab} onChange={handleTabChange} aria-label="company tabs">
             <Tab label="About Us" />
+            <Tab label="Porfolio" />
             <Tab label="Investors" />
             <Tab label="Assessment" />
-            <Tab label="Transformation Plan" />
-            <Tab label="Careers" />
           </Tabs>
-  
+
           {activeTab === 0 && (
             <>
               <Typography variant="h5" component="div" sx={{ mt: 3, mb: 1 }}>
@@ -173,7 +170,7 @@ const [activeTab, setActiveTab] = useState(0);
                   <li>Sustainable practices</li>
                 </ul>
               </Typography>
-  
+
               {/* Key Information Section (Moved inside About Us tab) */}
               <Typography variant="h5" component="div" sx={{ mt: 3, mb: 1 }}>
                 Key Information
@@ -224,7 +221,7 @@ const [activeTab, setActiveTab] = useState(0);
                   </Box>
                 </Grid>
               </Grid>
-  
+
               {/* Financial Information Section (Moved inside About Us tab) */}
               <Typography variant="h5" component="div" sx={{ mt: 3, mb: 1 }}>
                 Financial Highlights
@@ -241,105 +238,88 @@ const [activeTab, setActiveTab] = useState(0);
               </Grid>
             </>
           )}
-  
+
           {/* ... (Careers, Investors, Assessment, Transformation Plan tabs) */}
-          {activeTab === 4 && (
-          <>
-            <Typography variant="h5" component="div" sx={{ mt: 3, mb: 1 }}>
-              Careers
-            </Typography>
-            <Typography variant="body1" sx={{ mb: 2 }}>
-              We're always looking for talented individuals to join our team!
-            </Typography>
-            <Typography variant="body2" sx={{ mb: 2 }}>
-              Open Positions:
-              <ul>
-                <li>Senior Software Engineer - Apply <a href="/careers/senior-software-engineer">here</a></li>
-                <li>Marketing Specialist - Apply <a href="/careers/marketing-specialist">here</a></li>
-                <li>Data Analyst - Apply <a href="/careers/data-analyst">here</a></li>
-              </ul>
-            </Typography>
-            <Typography variant="body2" sx={{ mb: 2 }}>
-              Benefits:
-              <ul>
-                <li>Competitive salary and benefits package</li>
-                <li>Flexible work arrangements</li>
-                <li>Opportunities for professional growth</li>
-              </ul>
-            </Typography>
-          </>
-        )}
 
-        {activeTab === 1 && (
-          <>
-            <Typography variant="h5" component="div" sx={{ mt: 3, mb: 1 }}>
-              Investors
-            </Typography>
-            <Typography variant="body1" sx={{ mb: 2 }}>
-              Welcome to our investor relations page.
-            </Typography>
-            <Typography variant="body2" sx={{ mb: 2 }}>
-              Key Investor Highlights:
-              <ul>
-                <li>Annual Report 2023 - Download <a href="/investors/annual-report-2023">here</a></li>
-                <li>Financial Results Q4 2023 - View <a href="/investors/financial-results-q4-2023">here</a></li>
-                <li>Investor Presentations - Access <a href="/investors/presentations">here</a></li>
-              </ul>
-            </Typography>
-            <Typography variant="body2" sx={{ mb: 2 }}>
-              Contact Investor Relations: <a href="mailto:investors@company.com">investors@company.com</a>
-            </Typography>
-          </>
-        )}
+          {activeTab === 2 && (
+            <>
+              <Typography variant="h5" component="div" sx={{ mt: 3, mb: 1 }}>
+                Investors
+              </Typography>
+              <Typography variant="body1" sx={{ mb: 2 }}>
+                Welcome to our investor relations page.
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 2 }}>
+                Key Investor Highlights:
+                <ul>
+                  <li>Annual Report 2023 - Download <a href="/investors/annual-report-2023">here</a></li>
+                  <li>Financial Results Q4 2023 - View <a href="/investors/financial-results-q4-2023">here</a></li>
+                  <li>Investor Presentations - Access <a href="/investors/presentations">here</a></li>
+                </ul>
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 2 }}>
+                Contact Investor Relations: <a href="mailto:investors@company.com">investors@company.com</a>
+              </Typography>
+            </>
+          )}
 
-        {activeTab === 2 && (
-          <>
-            <Typography variant="h5" component="div" sx={{ mt: 3, mb: 1 }}>
-              Assessment
-            </Typography>
-            <Typography variant="body1" sx={{ mb: 2 }}>
-              Our company undergoes regular assessments to ensure continuous improvement.
-            </Typography>
-            <Typography variant="body2" sx={{ mb: 2 }}>
-              Key Assessment Findings:
-              <ul>
-                <li>Strong market position in the technology sector.</li>
-                <li>Opportunities for improvement in customer satisfaction.</li>
-                <li>Commitment to sustainability and environmental responsibility.</li>
-              </ul>
-            </Typography>
-            <Typography variant="body2" sx={{ mb: 2 }}>
-              Assessment Reports:
-              <ul>
-                <li>Sustainability Report - Download <a href="/assessment/sustainability-report">here</a></li>
-                <li>Customer Satisfaction Report - Download <a href="/assessment/customer-satisfaction-report">here</a></li>
-              </ul>
-            </Typography>
-          </>
-        )}
+          {activeTab === 3 && (
+            <>
+              <Typography variant="h5" component="div" sx={{ mt: 3, mb: 1 }}>
+                Assessment
+              </Typography>
+              <Typography variant="body1" sx={{ mb: 2 }}>
+                Our company undergoes regular assessments to ensure continuous improvement.
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 2 }}>
+                Key Assessment Findings:
+                <ul>
+                  <li>Strong market position in the technology sector.</li>
+                  <li>Opportunities for improvement in customer satisfaction.</li>
+                  <li>Commitment to sustainability and environmental responsibility.</li>
+                </ul>
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 2 }}>
+                Assessment Reports:
+                <ul>
+                  <li>Sustainability Report - Download <a href="/assessment/sustainability-report">here</a></li>
+                  <li>Customer Satisfaction Report - Download <a href="/assessment/customer-satisfaction-report">here</a></li>
+                </ul>
+              </Typography>
+            </>
+          )}
 
-        {activeTab === 3 && (
-          <>
-            <Typography variant="h5" component="div" sx={{ mt: 3, mb: 1 }}>
-              Transformation Plan
-            </Typography>
-            <Typography variant="body1" sx={{ mb: 2 }}>
-              Our strategic transformation plan is focused on innovation and growth.
-            </Typography>
-            <Typography variant="body2" sx={{ mb: 2 }}>
-              Key Transformation Initiatives:
-              <ul>
-                <li>Digital transformation to enhance customer experience.</li>
-                <li>Expansion into new markets and product lines.</li>
-                <li>Investment in research and development for cutting-edge technologies.</li>
-              </ul>
-            </Typography>
-            <Typography variant="body2" sx={{ mb: 2 }}>
-              Transformation Plan Document - Download <a href="/transformation-plan/document">here</a>
-            </Typography>
-          </>
-        )}
-  
+
+          {activeTab === 1 && ( // Portfolio Tab
+            <>
+              <Typography variant="h5" component="div" sx={{ mt: 3, mb: 1 }}>
+                Portfolio
+              </Typography>
+              <Typography variant="body1" sx={{ mb: 2 }}>
+                Our portfolio showcases our diverse projects and achievements.
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 2 }}>
+                Featured Projects:
+                <ul>
+                  <li>Project A - View Details <a href="/portfolio/project-a">here</a></li>
+                  <li>Project B - View Details <a href="/portfolio/project-b">here</a></li>
+                  <li>Project C - View Details <a href="/portfolio/project-c">here</a></li>
+                </ul>
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 2 }}>
+                Client Success Stories:
+                <ul>
+                  <li>Client X - Read Story <a href="/portfolio/client-x">here</a></li>
+                  <li>Client Y - Read Story <a href="/portfolio/client-y">here</a></li>
+                </ul>
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 2 }}>
+                View our complete portfolio: <a href="/portfolio">here</a>
+              </Typography>
+            </>
+          )}
+
+
           <Box sx={{ textAlign: 'center', mt: 4 }}>
             <Button variant="contained" color="primary" size="large">
               Contact Us
@@ -366,48 +346,48 @@ const [activeTab, setActiveTab] = useState(0);
           sx={{ mb: 1 }}
         />
         <Grid container spacing={2}>
-  <Grid item xs={12} sm={6} md={3}>
-    <Select
-      fullWidth
-      value={filterCategory}
-      onChange={(e) => setFilterCategory(e.target.value)}
-      displayEmpty
-    >
-      <MenuItem value="">Select Category</MenuItem> {/* Placeholder */}
-      {categories.map((category) => (
-                    <MenuItem key={category} value={category}>
-                      {category}
-                    </MenuItem>
-                  ))}
-    </Select>
-  </Grid>
-  <Grid item xs={12} sm={6} md={3}>
-    <Select
-      fullWidth
-      value={filterSize}
-      onChange={(e) => setFilterSize(e.target.value)}
-      displayEmpty
-    >
-      <MenuItem value="">Select Size</MenuItem> {/* Placeholder */}
-      <MenuItem value="Small">Small</MenuItem>
-      <MenuItem value="Medium">Medium</MenuItem>
-      <MenuItem value="Large">Large</MenuItem>
-    </Select>
-  </Grid>
-  <Grid item xs={12} sm={6} md={3}>
-    <Select
-      fullWidth
-      value={filterLocation}
-      onChange={(e) => setFilterLocation(e.target.value)}
-      displayEmpty
-    >
-      <MenuItem value="">Select Location</MenuItem> {/* Placeholder */}
-      <MenuItem value="San Francisco, CA">San Francisco, CA</MenuItem>
-      <MenuItem value="New York, NY">New York, NY</MenuItem>
-      <MenuItem value="London, UK">London, UK</MenuItem>
-    </Select>
-  </Grid>
-</Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <Select
+              fullWidth
+              value={filterCategory}
+              onChange={(e) => setFilterCategory(e.target.value)}
+              displayEmpty
+            >
+              <MenuItem value="">Select Category</MenuItem> {/* Placeholder */}
+              {categories.map((category) => (
+                <MenuItem key={category} value={category}>
+                  {category}
+                </MenuItem>
+              ))}
+            </Select>
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <Select
+              fullWidth
+              value={filterSize}
+              onChange={(e) => setFilterSize(e.target.value)}
+              displayEmpty
+            >
+              <MenuItem value="">Select Size</MenuItem> {/* Placeholder */}
+              <MenuItem value="Small">Small</MenuItem>
+              <MenuItem value="Medium">Medium</MenuItem>
+              <MenuItem value="Large">Large</MenuItem>
+            </Select>
+          </Grid>
+          <Grid item xs={12} sm={6} md={3}>
+            <Select
+              fullWidth
+              value={filterLocation}
+              onChange={(e) => setFilterLocation(e.target.value)}
+              displayEmpty
+            >
+              <MenuItem value="">Select Location</MenuItem> {/* Placeholder */}
+              <MenuItem value="San Francisco, CA">San Francisco, CA</MenuItem>
+              <MenuItem value="New York, NY">New York, NY</MenuItem>
+              <MenuItem value="London, UK">London, UK</MenuItem>
+            </Select>
+          </Grid>
+        </Grid>
       </Box>
 
       <Grid container spacing={3}>
@@ -434,9 +414,9 @@ const [activeTab, setActiveTab] = useState(0);
                   Revenue: ${company.financialStatement.revenue}
                 </Typography>
                 <Typography variant="body2" color="text.secondary">
-                Description: {company.description.substring(0, DESCRIPTION_PREVIEW_LENGTH)}...
-              </Typography>
-                
+                  Description: {company.description.substring(0, DESCRIPTION_PREVIEW_LENGTH)}...
+                </Typography>
+
               </CardContent>
             </Card>
           </Grid>
