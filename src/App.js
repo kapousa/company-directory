@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Container,
   TextField,
@@ -82,7 +82,7 @@ function App() {
     };
   }, [companiesData]);
 
-  const loadInitialData = () => {
+  const loadInitialData = useCallback(() => {
     setLoading(true);
     setTimeout(() => {
       const initialData = Array.from({ length: 10 }, (_, i) => generateDummyCompany(i));
@@ -110,22 +110,22 @@ function App() {
       setCompaniesData(filteredInitialData); // Update with filtered data
       setLoading(false);
     }, 1000);
-  };
+  }, [searchTerm, filterCategory, filterSize, filterLocation]);
 
-  const loadMoreData = () => {
+  const loadMoreData = useCallback(() => {
     if (isFetching.current) return; // Use isFetching
     isFetching.current = true; // Set isFetching to true
     setLoading(true); // set loading true for the spinner.
     setTimeout(() => {
       const newData = Array.from({ length: 10 }, (_, i) => generateDummyCompany(companiesData.length + i));
       const combinedData = [...companiesData, ...newData];
-  
+
       const filteredCombinedData = combinedData.filter((company) => {
         const nameMatch = company.name.toLowerCase().includes(searchTerm.toLowerCase());
         let categoryMatch = true;
         let sizeMatch = true;
         let locationMatch = true;
-  
+
         if (filterCategory) {
           categoryMatch = company.category === filterCategory;
         }
@@ -135,15 +135,15 @@ function App() {
         if (filterLocation) {
           locationMatch = company.location === filterLocation;
         }
-  
+
         return nameMatch && categoryMatch && sizeMatch && locationMatch;
       });
-  
+
       setCompaniesData(filteredCombinedData);
       setLoading(false);
       isFetching.current = false; // Set isFetching to false
     }, 5000);
-  };
+  }, [companiesData, searchTerm, filterCategory, filterSize, filterLocation]);
 
   const generateDummyCompany = (index) => ({
     id: index + 1,
