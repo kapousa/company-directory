@@ -45,46 +45,34 @@ function App() {
   const [activeTab, setActiveTab] = useState(0);
   const scrollRef = useRef(null);
   const sentinelRef = useRef(null);
-  const observerRef = useRef(null); // Create a ref for the observer
-  const isFetching = useRef(false); // Add isFetching ref
-
 
   useEffect(() => {
     loadInitialData();
-  }, [searchTerm, filterCategory, filterSize, filterLocation]);
-
-  useEffect(() => {
-    if (observerRef.current) {
-      observerRef.current.disconnect();
-    }
-
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0].isIntersecting && !isFetching.current) {
-          setLoading(true); // Set loading to true here
+        if (entries[0].isIntersecting && !loading) {
           loadMoreData();
         }
       },
       { threshold: 1 }
     );
-
+  
     if (sentinelRef.current) {
       observer.observe(sentinelRef.current);
     }
-
-    observerRef.current = observer;
-
+  
     return () => {
-      if (observerRef.current) {
-        observerRef.current.disconnect();
+      window.removeEventListener('scroll', handleScroll);
+      if (sentinelRef.current) {
+        observer.unobserve(sentinelRef.current);
       }
     };
-  }, [companiesData]);
+  }, [searchTerm, filterCategory, filterSize, filterLocation, loading]); // Added loading as dependency
 
   const loadInitialData = () => {
     setLoading(true);
     setTimeout(() => {
-      const initialData = Array.from({ length: 20 }, (_, i) => generateDummyCompany(i));
+      const initialData = Array.from({ length: 10 }, (_, i) => generateDummyCompany(i));
 
       // Apply filters to initial data
       const filteredInitialData = initialData.filter((company) => {
@@ -112,19 +100,18 @@ function App() {
   };
 
   const loadMoreData = () => {
-    if (isFetching.current) return; // Use isFetching
-    isFetching.current = true; // Set isFetching to true
-    setLoading(true); // set loading true for the spinner.
+    if (loading) return;
+    setLoading(true);
     setTimeout(() => {
       const newData = Array.from({ length: 10 }, (_, i) => generateDummyCompany(companiesData.length + i));
       const combinedData = [...companiesData, ...newData];
-  
+
       const filteredCombinedData = combinedData.filter((company) => {
         const nameMatch = company.name.toLowerCase().includes(searchTerm.toLowerCase());
         let categoryMatch = true;
         let sizeMatch = true;
         let locationMatch = true;
-  
+
         if (filterCategory) {
           categoryMatch = company.category === filterCategory;
         }
@@ -134,13 +121,12 @@ function App() {
         if (filterLocation) {
           locationMatch = company.location === filterLocation;
         }
-  
+
         return nameMatch && categoryMatch && sizeMatch && locationMatch;
       });
-  
+
       setCompaniesData(filteredCombinedData);
       setLoading(false);
-      isFetching.current = false; // Set isFetching to false
     }, 1000);
   };
 
@@ -166,7 +152,18 @@ function App() {
     values: ['Integrity', 'Innovation', 'Excellence', 'Collaboration'],
   });
 
-
+  const handleScroll = () => {
+    if (scrollRef.current) {
+      const scrollElement = scrollRef.current;
+      if (
+        window.innerHeight + scrollElement.getBoundingClientRect().top + window.scrollY >=
+        scrollElement.offsetHeight + scrollElement.getBoundingClientRect().top &&
+        !loading
+      ) {
+        loadMoreData();
+      }
+    }
+  };
 
   const handleCompanyClick = (company) => {
     setSelectedCompany(company);
@@ -562,8 +559,8 @@ function App() {
               ))}
             </Grid>
             <Grid item xs={12} ref={sentinelRef}>
-              <div style={{ height: '20px' }}></div>
-            </Grid>
+    <div style={{ height: '20px' }}></div>
+  </Grid>
             {loading && (
               <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
                 <CircularProgress />

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Container,
   TextField,
@@ -11,11 +11,13 @@ import {
   Button,
   Box,
   Grid,
-  Pagination,
   Paper,
   Tabs,
   Tab,
+  CircularProgress,
 } from '@mui/material';
+import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom'; // Import routing components
+import LandingPage from './LandingPage'; // Import LandingPage
 
 const DESCRIPTION_PREVIEW_LENGTH = 150;
 
@@ -32,61 +34,140 @@ const categories = [
   'Transportation',
 ];
 
-// Generate dummy company data with financial statements
-const companiesData = Array.from({ length: 20 }, (_, i) => ({
-  id: i + 1,
-  name: `Company ${i + 1}`,
-  category: categories[i % categories.length],
-  size: ['Small', 'Medium', 'Large'][i % 3],
-  location: ['San Francisco, CA', 'New York, NY', 'London, UK'][i % 3],
-  employees: Math.floor(Math.random() * 1000),
-  description: `Company ${i + 1} is a dynamic and innovative leader in the ${['technology', 'food and beverage', 'environmental'][i % 3]
-    } sector. With a strong commitment to excellence and a passion for creating cutting-edge solutions, we empower our clients to achieve their business goals. Our team of experts brings a wealth of experience and expertise to every project, ensuring that we deliver exceptional results that exceed expectations. We are dedicated to building long-lasting relationships with our clients, based on trust, integrity, and mutual respect. Our mission is to make a positive impact on the world through our work, and we strive to be a catalyst for change in our industry. We are committed to sustainability and responsible business practices, and we believe in giving back to our communities. Our values of innovation, collaboration, and customer focus drive everything we do, and we are constantly seeking new ways to improve and grow. We are proud to be a part of the global community and contribute to a better future.`,
-  logo: require(`./logos/${i + 1}.jpg`),
-  website: `https://company${i + 1}.com`,
-  financialStatement: {
-    revenue: Math.floor(Math.random() * 1000000),
-    profit: Math.floor(Math.random() * 500000),
-    assets: Math.floor(Math.random() * 2000000),
-    liabilities: Math.floor(Math.random() * 1000000),
-  },
-  founded: `${1980 + (i % 40)}-01-01`,
-  headquarters: ['San Francisco', 'New York', 'London', 'Tokyo'][i % 4],
-  mission: `Our mission is to lead innovation in the ${categories[i % categories.length].toLowerCase()
-    } sector.`,
-  values: ['Integrity', 'Innovation', 'Excellence', 'Collaboration'],
-}));
-
-const COMPANIES_PER_PAGE = 9;
-
 function App() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
   const [filterSize, setFilterSize] = useState('');
   const [filterLocation, setFilterLocation] = useState('');
   const [selectedCompany, setSelectedCompany] = useState(null);
-  const [page, setPage] = useState(1);
-
+  const [companiesData, setCompaniesData] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
+  const scrollRef = useRef(null);
+  const sentinelRef = useRef(null);
+  const observerRef = useRef(null); // Create a ref for the observer
+  const isFetching = useRef(false); // Add isFetching ref
+  
 
-  const filteredCompanies = companiesData.filter((company) => {
-    const nameMatch = company.name.toLowerCase().includes(searchTerm.toLowerCase());
-    let categoryMatch = true;
-    let sizeMatch = true;
-    let locationMatch = true;
 
-    if (filterCategory) {
-      categoryMatch = company.category === filterCategory;
-    }
-    if (filterSize) {
-      sizeMatch = company.size === filterSize;
-    }
-    if (filterLocation) {
-      locationMatch = company.location === filterLocation;
+  useEffect(() => {
+    loadInitialData();
+  }, [searchTerm, filterCategory, filterSize, filterLocation]);
+
+  useEffect(() => {
+    if (observerRef.current) {
+      observerRef.current.disconnect();
     }
 
-    return nameMatch && categoryMatch && sizeMatch && locationMatch;
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !isFetching.current) {
+          setLoading(true); // Set loading to true here
+          loadMoreData();
+        }
+      },
+      { threshold: 1 }
+    );
+
+    if (sentinelRef.current) {
+      observer.observe(sentinelRef.current);
+    }
+
+    observerRef.current = observer;
+
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, [companiesData]);
+
+  const loadInitialData = () => {
+    setLoading(true);
+    setTimeout(() => {
+      const initialData = Array.from({ length: 10 }, (_, i) => generateDummyCompany(i));
+
+      // Apply filters to initial data
+      const filteredInitialData = initialData.filter((company) => {
+        const nameMatch = company.name.toLowerCase().includes(searchTerm.toLowerCase());
+        let categoryMatch = true;
+        let sizeMatch = true;
+        let locationMatch = true;
+
+        if (filterCategory) {
+          categoryMatch = company.category === filterCategory;
+        }
+        if (filterSize) {
+          sizeMatch = company.size === filterSize;
+        }
+        if (filterLocation) {
+          locationMatch = company.location === filterLocation;
+        }
+
+        return nameMatch && categoryMatch && sizeMatch && locationMatch;
+      });
+
+      setCompaniesData(filteredInitialData); // Update with filtered data
+      setLoading(false);
+    }, 1000);
+  };
+
+  const loadMoreData = () => {
+    if (isFetching.current) return; // Use isFetching
+    isFetching.current = true; // Set isFetching to true
+    setLoading(true); // set loading true for the spinner.
+    setTimeout(() => {
+      const newData = Array.from({ length: 10 }, (_, i) => generateDummyCompany(companiesData.length + i));
+      const combinedData = [...companiesData, ...newData];
+  
+      const filteredCombinedData = combinedData.filter((company) => {
+        const nameMatch = company.name.toLowerCase().includes(searchTerm.toLowerCase());
+        let categoryMatch = true;
+        let sizeMatch = true;
+        let locationMatch = true;
+  
+        if (filterCategory) {
+          categoryMatch = company.category === filterCategory;
+        }
+        if (filterSize) {
+          sizeMatch = company.size === filterSize;
+        }
+        if (filterLocation) {
+          locationMatch = company.location === filterLocation;
+        }
+  
+        return nameMatch && categoryMatch && sizeMatch && locationMatch;
+      });
+  
+      setCompaniesData(filteredCombinedData);
+      setLoading(false);
+      isFetching.current = false; // Set isFetching to false
+    }, 5000);
+  };
+
+  const generateDummyCompany = (index) => ({
+    id: index + 1,
+    name: `Company ${index + 1}`,
+    category: categories[index % categories.length],
+    size: ['Small', 'Medium', 'Large'][index % 3],
+    location: ['San Francisco, CA', 'New York, NY', 'London, UK'][index % 3],
+    employees: Math.floor(Math.random() * 1000),
+    description: `Company ${index + 1} is a dynamic...`,
+    logo: require(`./logos/${index % 5 + 1}.jpg`),
+    website: `https://company${index + 1}.com`,
+    financialStatement: {
+      revenue: Math.floor(Math.random() * 1000000),
+      profit: Math.floor(Math.random() * 500000),
+      assets: Math.floor(Math.random() * 2000000),
+      liabilities: Math.floor(Math.random() * 1000000),
+    },
+    founded: `${1980 + (index % 40)}-01-01`,
+    headquarters: ['San Francisco', 'New York', 'London', 'Tokyo'][index % 4],
+    mission: `Our mission is to lead innovation...`,
+    values: ['Integrity', 'Innovation', 'Excellence', 'Collaboration'],
   });
+
+
 
   const handleCompanyClick = (company) => {
     setSelectedCompany(company);
@@ -96,16 +177,9 @@ function App() {
     setSelectedCompany(null);
   };
 
-  const handleChangePage = (event, newPage) => {
-    setPage(newPage);
-  };
-
   const handleTabChange = (event, newValue) => {
     setActiveTab(newValue);
   };
-  const startIndex = (page - 1) * COMPANIES_PER_PAGE;
-  const endIndex = startIndex + COMPANIES_PER_PAGE;
-  const companiesToDisplay = filteredCompanies.slice(startIndex, endIndex);
 
   if (selectedCompany) {
     return (
@@ -393,105 +467,118 @@ function App() {
   }
 
   return (
-    <Container maxWidth="md" sx={{ mt: 4 }}>
-      <Typography variant="h4" component="h1" gutterBottom>
-        Company Directory
-      </Typography>
+    <Router>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/directory" element={
+          <Container maxWidth="md" sx={{ mt: 4 }}>
+            <Typography variant="h4" component="h1" gutterBottom>
+              Company Directory
+            </Typography>
 
-      <Box sx={{ mb: 3 }}>
-        <TextField
-          label="Search companies..."
-          variant="outlined"
-          fullWidth
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          sx={{ mb: 1 }}
-        />
-        <Grid container spacing={2}>
-          <Grid item xs={12} sm={6} md={3}>
-            <Select
-              fullWidth
-              value={filterCategory}
-              onChange={(e) => setFilterCategory(e.target.value)}
-              displayEmpty
-            >
-              <MenuItem value="">Select Category</MenuItem> {/* Placeholder */}
-              {categories.map((category) => (
-                <MenuItem key={category} value={category}>
-                  {category}
-                </MenuItem>
-              ))}
-            </Select>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <Select
-              fullWidth
-              value={filterSize}
-              onChange={(e) => setFilterSize(e.target.value)}
-              displayEmpty
-            >
-              <MenuItem value="">Select Size</MenuItem> {/* Placeholder */}
-              <MenuItem value="Small">Small</MenuItem>
-              <MenuItem value="Medium">Medium</MenuItem>
-              <MenuItem value="Large">Large</MenuItem>
-            </Select>
-          </Grid>
-          <Grid item xs={12} sm={6} md={3}>
-            <Select
-              fullWidth
-              value={filterLocation}
-              onChange={(e) => setFilterLocation(e.target.value)}
-              displayEmpty
-            >
-              <MenuItem value="">Select Location</MenuItem> {/* Placeholder */}
-              <MenuItem value="San Francisco, CA">San Francisco, CA</MenuItem>
-              <MenuItem value="New York, NY">New York, NY</MenuItem>
-              <MenuItem value="London, UK">London, UK</MenuItem>
-            </Select>
-          </Grid>
-        </Grid>
-      </Box>
-
-      <Grid container spacing={3}>
-        {companiesToDisplay.map((company) => (
-          <Grid item xs={12} sm={6} md={4} key={company.id}>
-            <Card onClick={() => handleCompanyClick(company)} sx={{ cursor: 'pointer', height: '100%' }}>
-              <CardMedia
-                component="img"
-                sx={{ width: '100%', height: 150, objectFit: 'contain' }}
-                image={company.logo}
-                alt={company.name}
+            <Box sx={{ mb: 3 }}>
+              <TextField
+                label="Search companies..."
+                variant="outlined"
+                fullWidth
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                sx={{ mb: 1 }}
               />
-              <CardContent>
-                <Typography variant="h6" component="div">
-                  {company.name}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Category: {company.category}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Location: {company.location}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Revenue: ${company.financialStatement.revenue}
-                </Typography>
-                <Typography variant="body2" color="text.secondary">
-                  Description: {company.description.substring(0, DESCRIPTION_PREVIEW_LENGTH)}...
-                </Typography>
+              <Grid container spacing={2}>
+                <Grid item xs={12} sm={6} md={3}>
+                  <Select
+                    fullWidth
+                    value={filterCategory}
+                    onChange={(e) => setFilterCategory(e.target.value)}
+                    displayEmpty
+                  >
+                    <MenuItem value="">Select Category</MenuItem> {/* Placeholder */}
+                    {categories.map((category) => (
+                      <MenuItem key={category} value={category}>
+                        {category}
+                      </MenuItem>
+                    ))}
+                  </Select>
+                </Grid>
+                <Grid item xs={12} sm={6} md={3}>
+                  <Select
+                    fullWidth
+                    value={filterSize}
+                    onChange={(e) => setFilterSize(e.target.value)}
+                    displayEmpty
+                  >
+                    <MenuItem value="">Select Size</MenuItem> {/* Placeholder */}
+                    <MenuItem value="Small">Small</MenuItem>
+                    <MenuItem value="Medium">Medium</MenuItem>
+                    <MenuItem value="Large">Large</MenuItem>
+                  </Select>
+                </Grid>
+                <Grid item xs={12} sm={6} md={3}>
+                  <Select
+                    fullWidth
+                    value={filterLocation}
+                    onChange={(e) => setFilterLocation(e.target.value)}
+                    displayEmpty
+                  >
+                    <MenuItem value="">Select Location</MenuItem> {/* Placeholder */}
+                    <MenuItem value="San Francisco, CA">San Francisco, CA</MenuItem>
+                    <MenuItem value="New York, NY">New York, NY</MenuItem>
+                    <MenuItem value="London, UK">London, UK</MenuItem>
+                  </Select>
+                </Grid>
+              </Grid>
+            </Box>
 
-              </CardContent>
-            </Card>
-          </Grid>
-        ))}
-      </Grid>
-      <Pagination
-        count={Math.ceil(filteredCompanies.length / COMPANIES_PER_PAGE)}
-        page={page}
-        onChange={handleChangePage}
-        sx={{ mt: 2, display: 'flex', justifyContent: 'center' }}
-      />
-    </Container>
+            <Grid container spacing={3} ref={scrollRef}>
+              {companiesData.map((company) => (
+                <Grid item xs={12} sm={6} md={4} key={company.id}>
+                  <Card onClick={() => handleCompanyClick(company)} sx={{ cursor: 'pointer', height: '100%' }}>
+                    <CardMedia
+                      component="img"
+                      sx={{ width: '100%', height: 150, objectFit: 'contain' }}
+                      image={company.logo}
+                      alt={company.name}
+                    />
+                    <CardContent>
+                      <Typography variant="h6" component="div">
+                        {company.name}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Category: {company.category}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Location: {company.location}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Revenue: ${company.financialStatement.revenue}
+                      </Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Description: {company.description.substring(0, DESCRIPTION_PREVIEW_LENGTH)}...
+                      </Typography>
+
+                    </CardContent>
+                  </Card>
+                </Grid>
+              ))}
+            </Grid>
+            <Grid item xs={12} ref={sentinelRef}>
+              <div style={{ height: '20px' }}></div>
+            </Grid>
+            {loading && (
+              <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+                <CircularProgress />
+              </Box>
+            )}
+          </Container>
+        }
+        />
+        <Route path="*" element={<Navigate to="/" replace />} />
+      </Routes>
+    </Router>
+
   );
+
 }
 
 export default App;
