@@ -49,39 +49,6 @@ function App() {
   const isFetching = useRef(false); // Add isFetching ref
   
 
-
-  useEffect(() => {
-    loadInitialData();
-  }, [searchTerm, filterCategory, filterSize, filterLocation]);
-
-  useEffect(() => {
-    if (observerRef.current) {
-      observerRef.current.disconnect();
-    }
-
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && !isFetching.current) {
-          setLoading(true); // Set loading to true here
-          loadMoreData();
-        }
-      },
-      { threshold: 1 }
-    );
-
-    if (sentinelRef.current) {
-      observer.observe(sentinelRef.current);
-    }
-
-    observerRef.current = observer;
-
-    return () => {
-      if (observerRef.current) {
-        observerRef.current.disconnect();
-      }
-    };
-  }, [companiesData]);
-
   const loadInitialData = useCallback(() => {
     setLoading(true);
     setTimeout(() => {
@@ -144,6 +111,38 @@ function App() {
       isFetching.current = false; // Set isFetching to false
     }, 5000);
   }, [companiesData, searchTerm, filterCategory, filterSize, filterLocation]);
+  
+  useEffect(() => {
+    loadInitialData();
+  }, [searchTerm, filterCategory, filterSize, filterLocation, loadInitialData]);
+
+  useEffect(() => {
+    if (observerRef.current) {
+      observerRef.current.disconnect();
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting && !isFetching.current) {
+          setLoading(true); // Set loading to true here
+          loadMoreData();
+        }
+      },
+      { threshold: 1 }
+    );
+
+    if (sentinelRef.current) {
+      observer.observe(sentinelRef.current);
+    }
+
+    observerRef.current = observer;
+
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, [companiesData, loadMoreData]);
 
   const generateDummyCompany = (index) => ({
     id: index + 1,
