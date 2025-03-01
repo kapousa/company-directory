@@ -152,6 +152,7 @@ function App() {
             <Tab label="Porfolio" />
             <Tab label="Investors" />
             <Tab label="Assessment" />
+            <Tab label="Transformation Plan" />
           </Tabs>
 
           {activeTab === 0 && (
@@ -289,7 +290,6 @@ function App() {
             </>
           )}
 
-
           {activeTab === 1 && ( // Portfolio Tab
             <>
               <Typography variant="h5" component="div" sx={{ mt: 3, mb: 1 }}>
@@ -319,6 +319,68 @@ function App() {
             </>
           )}
 
+          {activeTab === 4 && (
+            <>
+              <Typography variant="h5" component="div" sx={{ mt: 3, mb: 1 }}>
+                Transformation Plan
+              </Typography>
+              <Typography variant="body1" sx={{ mb: 2 }}>
+                Our strategic transformation plan is focused on innovation and growth, divided into clear phases.
+              </Typography>
+
+              <Typography variant="h6" component="div" sx={{ mt: 2, mb: 1 }}>
+                Planning
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 2 }}>
+                In the planning phase, we conducted thorough market research, defined clear objectives, and established key performance indicators (KPIs). This phase involved:
+                <ul>
+                  <li>Market analysis and competitive benchmarking</li>
+                  <li>Strategic goal setting and resource allocation</li>
+                  <li>Development of a detailed project roadmap</li>
+                </ul>
+              </Typography>
+
+              <Typography variant="h6" component="div" sx={{ mt: 2, mb: 1 }}>
+                Execution
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 2 }}>
+                The execution phase focused on implementing the planned initiatives. This included:
+                <ul>
+                  <li>Team formation and role assignments</li>
+                  <li>Development of new technologies and systems</li>
+                  <li>Pilot testing and iterative improvements</li>
+                </ul>
+              </Typography>
+
+              <Typography variant="h6" component="div" sx={{ mt: 2, mb: 1 }}>
+                Monitoring
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 2 }}>
+                We continuously monitored progress against our KPIs and made necessary adjustments. This phase involved:
+                <ul>
+                  <li>Regular progress meetings and status reports</li>
+                  <li>Data analysis and performance tracking</li>
+                  <li>Risk assessment and mitigation</li>
+                </ul>
+              </Typography>
+
+              <Typography variant="h6" component="div" sx={{ mt: 2, mb: 1 }}>
+                Release
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 2 }}>
+                The release phase marked the successful completion and deployment of our transformation plan. This included:
+                <ul>
+                  <li>Final testing and quality assurance</li>
+                  <li>Rollout and user training</li>
+                  <li>Post-implementation reviews and feedback collection</li>
+                </ul>
+              </Typography>
+
+              <Typography variant="body2" sx={{ mb: 2 }}>
+                Transformation Plan Document - Download <a href="/transformation-plan/document">here</a>
+              </Typography>
+            </>
+          )}
 
           <Box sx={{ textAlign: 'center', mt: 4 }}>
             <Button variant="contained" color="primary" size="large">
