@@ -84,7 +84,7 @@ function App() {
     isFetching.current = true; // Set isFetching to true
     setLoading(true); // set loading true for the spinner.
     setTimeout(() => {
-      const newData = Array.from({ length: 10 }, (_, i) => generateDummyCompany(companiesData.length + i));
+      const newData = Array.from({ length: 20 }, (_, i) => generateDummyCompany(companiesData.length + i));
       const combinedData = [...companiesData, ...newData];
 
       const filteredCombinedData = combinedData.filter((company) => {
@@ -111,7 +111,7 @@ function App() {
       isFetching.current = false; // Set isFetching to false
     }, 5000);
   }, [companiesData, searchTerm, filterCategory, filterSize, filterLocation]);
-  
+
   useEffect(() => {
     loadInitialData();
   }, [searchTerm, filterCategory, filterSize, filterLocation, loadInitialData]);

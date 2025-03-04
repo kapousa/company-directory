@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Container,
   TextField,
@@ -47,11 +47,74 @@ function App() {
   const sentinelRef = useRef(null);
   const observerRef = useRef(null); // Create a ref for the observer
   const isFetching = useRef(false); // Add isFetching ref
+  
 
+  const loadInitialData = useCallback(() => {
+    setLoading(true);
+    setTimeout(() => {
+      const initialData = Array.from({ length: 10 }, (_, i) => generateDummyCompany(i));
+
+      // Apply filters to initial data
+      const filteredInitialData = initialData.filter((company) => {
+        const nameMatch = company.name.toLowerCase().includes(searchTerm.toLowerCase());
+        let categoryMatch = true;
+        let sizeMatch = true;
+        let locationMatch = true;
+
+        if (filterCategory) {
+          categoryMatch = company.category === filterCategory;
+        }
+        if (filterSize) {
+          sizeMatch = company.size === filterSize;
+        }
+        if (filterLocation) {
+          locationMatch = company.location === filterLocation;
+        }
+
+        return nameMatch && categoryMatch && sizeMatch && locationMatch;
+      });
+
+      setCompaniesData(filteredInitialData); // Update with filtered data
+      setLoading(false);
+    }, 1000);
+  }, [searchTerm, filterCategory, filterSize, filterLocation]);
+
+  const loadMoreData = useCallback(() => {
+    if (isFetching.current) return; // Use isFetching
+    isFetching.current = true; // Set isFetching to true
+    setLoading(true); // set loading true for the spinner.
+    setTimeout(() => {
+      const newData = Array.from({ length: 20 }, (_, i) => generateDummyCompany(companiesData.length + i));
+      const combinedData = [...companiesData, ...newData];
+
+      const filteredCombinedData = combinedData.filter((company) => {
+        const nameMatch = company.name.toLowerCase().includes(searchTerm.toLowerCase());
+        let categoryMatch = true;
+        let sizeMatch = true;
+        let locationMatch = true;
+
+        if (filterCategory) {
+          categoryMatch = company.category === filterCategory;
+        }
+        if (filterSize) {
+          sizeMatch = company.size === filterSize;
+        }
+        if (filterLocation) {
+          locationMatch = company.location === filterLocation;
+        }
+
+        return nameMatch && categoryMatch && sizeMatch && locationMatch;
+      });
+
+      setCompaniesData(filteredCombinedData);
+      setLoading(false);
+      isFetching.current = false; // Set isFetching to false
+    }, 5000);
+  }, [companiesData, searchTerm, filterCategory, filterSize, filterLocation]);
 
   useEffect(() => {
     loadInitialData();
-  }, [searchTerm, filterCategory, filterSize, filterLocation]);
+  }, [searchTerm, filterCategory, filterSize, filterLocation, loadInitialData]);
 
   useEffect(() => {
     if (observerRef.current) {
@@ -79,70 +142,7 @@ function App() {
         observerRef.current.disconnect();
       }
     };
-  }, [companiesData]);
-
-  const loadInitialData = () => {
-    setLoading(true);
-    setTimeout(() => {
-      const initialData = Array.from({ length: 20 }, (_, i) => generateDummyCompany(i));
-
-      // Apply filters to initial data
-      const filteredInitialData = initialData.filter((company) => {
-        const nameMatch = company.name.toLowerCase().includes(searchTerm.toLowerCase());
-        let categoryMatch = true;
-        let sizeMatch = true;
-        let locationMatch = true;
-
-        if (filterCategory) {
-          categoryMatch = company.category === filterCategory;
-        }
-        if (filterSize) {
-          sizeMatch = company.size === filterSize;
-        }
-        if (filterLocation) {
-          locationMatch = company.location === filterLocation;
-        }
-
-        return nameMatch && categoryMatch && sizeMatch && locationMatch;
-      });
-
-      setCompaniesData(filteredInitialData); // Update with filtered data
-      setLoading(false);
-    }, 1000);
-  };
-
-  const loadMoreData = () => {
-    if (isFetching.current) return; // Use isFetching
-    isFetching.current = true; // Set isFetching to true
-    setLoading(true); // set loading true for the spinner.
-    setTimeout(() => {
-      const newData = Array.from({ length: 10 }, (_, i) => generateDummyCompany(companiesData.length + i));
-      const combinedData = [...companiesData, ...newData];
-  
-      const filteredCombinedData = combinedData.filter((company) => {
-        const nameMatch = company.name.toLowerCase().includes(searchTerm.toLowerCase());
-        let categoryMatch = true;
-        let sizeMatch = true;
-        let locationMatch = true;
-  
-        if (filterCategory) {
-          categoryMatch = company.category === filterCategory;
-        }
-        if (filterSize) {
-          sizeMatch = company.size === filterSize;
-        }
-        if (filterLocation) {
-          locationMatch = company.location === filterLocation;
-        }
-  
-        return nameMatch && categoryMatch && sizeMatch && locationMatch;
-      });
-  
-      setCompaniesData(filteredCombinedData);
-      setLoading(false);
-      isFetching.current = false; // Set isFetching to false
-    }, 1000);
-  };
+  }, [companiesData, loadMoreData]);
 
   const generateDummyCompany = (index) => ({
     id: index + 1,
