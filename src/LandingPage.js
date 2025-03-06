@@ -33,19 +33,19 @@ const LandingPage = () => {
     {
       id: 1,
       name: 'Tech Innovators Inc.',
-      logo: require('./logos/1.jpg'),
+      logo: 'logos/1.jpg', // Updated path
       description: 'Leading the way in software solutions.',
     },
     {
       id: 2,
       name: 'Green Energy Solutions',
-      logo: require('./logos/5.jpg'),
+      logo: 'logos/5.jpg', // Updated path
       description: 'Sustainable energy for a better future.',
     },
-    {
+     {
       id: 3,
       name: 'Blue Energy Solutions',
-      logo: require('./logos/3.jpg'),
+      logo: 'logos/3.jpg', // Updated path
       description: 'Sustainable energy for a better future.',
     },
   ];
@@ -54,12 +54,12 @@ const LandingPage = () => {
     {
       quote: 'This directory has been invaluable for our business!',
       author: 'John Doe, CEO',
-      companyLogo: require('./logos/1.jpg'),
+      companyLogo: 'logos/1.jpg', // Updated path
     },
     {
       quote: 'I found the exact company I was looking for!',
       author: 'Jane Smith, Manager',
-      companyLogo: require('./logos/2.jpg'),
+      companyLogo: 'logos/2.jpg', // Updated path
     },
   ];
 
