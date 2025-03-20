@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+// App.js
+import React, { useState, useEffect } from 'react';
 import {
   Container,
   TextField,
@@ -8,151 +9,114 @@ import {
   CardContent,
   CardMedia,
   Typography,
-  Button,
   Box,
   Grid,
-  Paper,
-  Tabs,
-  Tab,
+  Pagination,
   CircularProgress,
+  Button,
 } from '@mui/material';
-import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { BrowserRouter as Router, Route, Routes, Navigate, Link, useNavigate } from 'react-router-dom';
 import LandingPage from './LandingPage';
 import axios from 'axios';
 import CompanyDetails from './CompanyDetails';
 
-const DESCRIPTION_PREVIEW_LENGTH = 150;
 const API_BASE_URL = 'http://127.0.0.1:8000';
 
 const categories = [
   'Technology',
-  'Food & Beverage',
-  'Environmental',
-  'Healthcare',
-  'Finance',
-  'Retail',
-  'Education',
-  'Manufacturing',
-  'Energy',
-  'Transportation',
+    'Retail',
+    'Health Care',
+    'Finance',
+    'Manufacturing',
+    'Education',
+    'Hospitality',
+    'Transportation',
+    'Energy',
+    'Agriculture',
 ];
+
+const sizes = [
+  'Large',
+  'Medium',
+  'Small',
+]
+
+const locations = [
+  'London, China',
+    'Madrid, Japan',
+    'London, France',
+    'Berlin, Japan',
+    'Berlin, Netherlands',
+    'Sydney, Canada',
+    'Sydney, Germany',
+    'New York, Sweden',
+    'Paris, Spain',
+    'Amsterdam, China',
+]
 
 function App() {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterCategory, setFilterCategory] = useState('');
   const [filterSize, setFilterSize] = useState('');
   const [filterLocation, setFilterLocation] = useState('');
-  const [selectedCompany, setSelectedCompany] = useState(null);
   const [companiesData, setCompaniesData] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState(0);
-  const scrollRef = useRef(null);
-  const sentinelRef = useRef(null);
-  const observerRef = useRef(null);
-  const isFetching = useRef(false);
+  const [page, setPage] = useState(1);
+  const COMPANIES_PER_PAGE = 9;
+  const [totalCompanies, setTotalCompanies] = useState(0);
 
-  const loadInitialData = useCallback(async () => {
-    console.log("loadInitialData called");
-    
+  const username = 'admin';
+  const password = 'password';
+
+  const fetchData = async (pageToLoad) => {
     setLoading(true);
     try {
-      const response = await axios.get(`${API_BASE_URL}/companies/`, {
+      const response = await axios.get(`${API_BASE_URL}/admin/companies/`, {
         params: {
           search: searchTerm,
           category: filterCategory,
           size: filterSize,
           location: filterLocation,
-          limit: 10,
+          limit: COMPANIES_PER_PAGE,
+          skip: (pageToLoad - 1) * COMPANIES_PER_PAGE,
+        },
+        auth: {
+          username: username,
+          password: password,
         },
       });
       setCompaniesData(response.data);
+      setTotalCompanies(response.headers['x-total-count']);
     } catch (error) {
       console.error('Error fetching data:', error);
     } finally {
       setLoading(false);
     }
+  };
+
+  useEffect(() => {
+    setPage(1);
+    fetchData(1);
   }, [searchTerm, filterCategory, filterSize, filterLocation]);
 
-  const loadMoreData = useCallback(async () => {
-    if (isFetching.current) return;
-    isFetching.current = true;
-    setLoading(true);
-    try {
-      const response = await axios.get(`${API_BASE_URL}/companies/`, {
-        params: {
-          search: searchTerm,
-          category: filterCategory,
-          size: filterSize,
-          location: filterLocation,
-          skip: companiesData.length,
-          limit: 20,
-        },
-      });
-      setCompaniesData([...companiesData, ...response.data]);
-    } catch (error) {
-      console.error('Error fetching more data:', error);
-    } finally {
-      setLoading(false);
-      isFetching.current = false;
-    }
-  }, [companiesData, searchTerm, filterCategory, filterSize, filterLocation]);
-
   useEffect(() => {
-    console.log("Filters changed:", { searchTerm, filterCategory, filterSize, filterLocation });
-  
-    loadInitialData();
-  }, [searchTerm, filterCategory, filterSize, filterLocation, loadInitialData]);
+    fetchData(page);
+  }, [page]);
 
-  useEffect(() => {
-    if (observerRef.current) {
-      observerRef.current.disconnect();
-    }
+  const handlePageChange = (event, value) => {
+    setPage(value);
+  };
 
-    const observer = new IntersectionObserver(
-      (entries) => {
-        if (entries[0].isIntersecting && !isFetching.current) {
-          setLoading(true);
-          loadMoreData();
-        }
-      },
-      { threshold: 1 }
+  // Wrapper component to pass navigate
+  function CompanyDetailsWrapper() {
+    const navigate = useNavigate();
+
+    return (
+      <Container maxWidth="md" sx={{ mt: 4 }}>
+        <CompanyDetails username={username} password={password} navigate={navigate} />
+      </Container>
     );
-
-    if (sentinelRef.current) {
-      observer.observe(sentinelRef.current);
-    }
-
-    observerRef.current = observer;
-
-    return () => {
-      if (observerRef.current) {
-        observerRef.current.disconnect();
-      }
-    };
-  }, [companiesData, loadMoreData]);
-
-  const handleCompanyClick = async (company) => {
-    try {
-      const url = `${API_BASE_URL}/companies/${company._id}`; // Correct URL construction
-      console.log("URL being sent:", url); // Add this line for debugging
-      const response = await axios.get(url);
-      setSelectedCompany(response.data);
-      if (scrollRef.current) {
-        scrollRef.current.scrollIntoView({ behavior: 'smooth' });
-      }
-    } catch (error) {
-      console.error('Error fetching company details:', error);
-      // ... (error handling)
-    }
-  };
-
-  const handleBack = () => {
-    setSelectedCompany(null);
-  };
-
-  const handleTabChange = (event, newValue) => {
-    setActiveTab(newValue);
-  };
+  }
 
   return (
     <Router>
@@ -161,75 +125,81 @@ function App() {
         <Route
           path="/directory"
           element={
-            selectedCompany ? (
-              <Container maxWidth="md" sx={{ mt: 4 }}>
-                <CompanyDetails selectedCompany={selectedCompany} handleBack={handleBack} />
-              </Container>
-            ) : (
-              <Container maxWidth="md" sx={{ mt: 4 }}>
-                <>
-                  <Typography variant="h4" component="h1" gutterBottom>
-                    Company Directory
-                  </Typography>
+            <Container maxWidth="md" sx={{ mt: 4 }}>
+              <>
+              <Link to="/" style={{ textDecoration: 'none' }}>
+                  <Button variant="outlined" sx={{ mb: 2 }}>
+                    Go to Landing Page
+                  </Button>
+                </Link>
+                <Typography variant="h4" component="h1" gutterBottom>
+                  Company Directory
+                </Typography>
 
-                  <Box sx={{ mb: 3 }}>
-                    <TextField
-                      label="Search companies..."
-                      variant="outlined"
-                      fullWidth
-                      value={searchTerm}
-                      onChange={(e) => setSearchTerm(e.target.value)}
-                      sx={{ mb: 1 }}
-                    />
-                    <Grid container spacing={2}>
-                      <Grid item xs={12} sm={6} md={3}>
-                        <Select
-                          fullWidth
-                          value={filterCategory}
-                          onChange={(e) => setFilterCategory(e.target.value)}
-                          displayEmpty
-                        >
-                          <MenuItem value="">Select Category</MenuItem>
-                          {categories.map((category) => (
-                            <MenuItem key={category} value={category}>
-                              {category}
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </Grid>
-                      <Grid item xs={12} sm={6} md={3}>
-                        <Select
-                          fullWidth
-                          value={filterSize}
-                          onChange={(e) => setFilterSize(e.target.value)}
-                          displayEmpty
-                        >
-                          <MenuItem value="">Select Size</MenuItem>
-                          <MenuItem value="Small">Small</MenuItem>
-                          <MenuItem value="Medium">Medium</MenuItem>
-                          <MenuItem value="Large">Large</MenuItem>
-                        </Select>
-                      </Grid>
-                      <Grid item xs={12} sm={6} md={3}>
-                        <Select
-                          fullWidth
-                          value={filterLocation}
-                          onChange={(e) => setFilterLocation(e.target.value)}
-                          displayEmpty
-                        >
-                          <MenuItem value="">Select Location</MenuItem>
-                          <MenuItem value="San Francisco, CA">San Francisco, CA</MenuItem>
-                          <MenuItem value="New York, NY">New York, NY</MenuItem>
-                          <MenuItem value="London, UK">London, UK</MenuItem>
-                        </Select>
-                      </Grid>
+                <Box sx={{ mb: 3 }}>
+                  <TextField
+                    label="Search companies..."
+                    variant="outlined"
+                    fullWidth
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    sx={{ mb: 1 }}
+                  />
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} sm={6} md={3}>
+                      <Select
+                        fullWidth
+                        value={filterCategory}
+                        onChange={(e) => setFilterCategory(e.target.value)}
+                        displayEmpty
+                      >
+                        <MenuItem value="">Select Category</MenuItem>
+                        {categories.map((category) => (
+                          <MenuItem key={category} value={category}>
+                            {category}
+                          </MenuItem>
+                        ))}
+                      </Select>
                     </Grid>
-                  </Box>
+                    <Grid item xs={12} sm={6} md={3}>
+                      <Select
+                        fullWidth
+                        value={filterSize}
+                        onChange={(e) => setFilterSize(e.target.value)}
+                        displayEmpty
+                      >
+                        <MenuItem value="">Select Size</MenuItem>
+                        {sizes.map((size) => (
+                          <MenuItem key={size} value={size}>
+                            {size}
+                          </MenuItem>
+                        ))}
+                        </Select>
+                      </Grid>
+                    
+                    <Grid item xs={12} sm={6} md={3}>
+                      <Select
+                        fullWidth
+                        value={filterLocation}
+                        onChange={(e) => setFilterLocation(e.target.value)}
+                        displayEmpty
+                      >
+                        <MenuItem value="">Company Location</MenuItem>
+                        {locations.map((location) => (
+                          <MenuItem key={location} value={location}>
+                            {location}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                    </Grid>
+                </Grid>
+                </Box>
 
-                  <Grid container spacing={3} ref={scrollRef}>
-                    {companiesData.map((company) => (
-                      <Grid item xs={12} sm={6} md={4} key={company._id}>
-                        <Card onClick={() => handleCompanyClick(company)} sx={{ cursor: 'pointer', height: '100%' }}>
+                <Grid container spacing={3}>
+                  {companiesData.map((company) => (
+                    <Grid item xs={12} sm={6} md={4} key={company.id}>
+                      <Link to={`/company/${company.id}`} style={{ textDecoration: 'none' }}>
+                        <Card sx={{ cursor: 'pointer', height: '100%' }}>
                           <CardMedia
                             component="img"
                             sx={{ width: '100%', height: 150, objectFit: 'contain' }}
@@ -250,32 +220,46 @@ function App() {
                               Location: {company.location}
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
-                              Revenue: ${company.financialStatement.revenue}
+                              Revenue: ${company.revenue}
                             </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                              Description: {company.description.substring(0, DESCRIPTION_PREVIEW_LENGTH)}...
+                            <Typography variant="body2" color="text.secondary" component="div">
+                              <div dangerouslySetInnerHTML={{ __html: company.description }} />
                             </Typography>
                           </CardContent>
                         </Card>
-                      </Grid>
-                    ))}
-                  </Grid>
-                  <Grid item xs={12} ref={sentinelRef}>
-                    <div style={{ height: '20px' }}></div>
-                  </Grid>
-                  {loading && (
-                    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
-                      <CircularProgress />
-                    </Box>
-                  )}
-                </>
-              </Container>
-            )
-          } // Added the closing parenthesis here!
+                      </Link>
+                    </Grid>
+                  ))}
+                </Grid>
+
+                {totalCompanies > COMPANIES_PER_PAGE && (
+                  <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+                    <Pagination
+                      count={Math.ceil(totalCompanies / COMPANIES_PER_PAGE)}
+                      page={page}
+                      onChange={handlePageChange}
+                      color="primary"
+                    />
+                  </Box>
+                )}
+
+                {loading && (
+                  <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
+                    <CircularProgress />
+                  </Box>
+                )}
+              </>
+            </Container>
+          }
+        />
+        <Route
+          path="/company/:companyId"
+          element={<CompanyDetailsWrapper />}
         />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
   );
 }
+
 export default App;

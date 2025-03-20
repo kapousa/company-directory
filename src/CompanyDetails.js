@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
     Container,
     Typography,
@@ -10,18 +10,200 @@ import {
     Tabs,
     Tab,
 } from '@mui/material';
+import axios from 'axios';
+import { useParams } from 'react-router-dom';
 
-const CompanyDetails = ({ selectedCompany, handleBack }) => {
+const API_BASE_URL = 'http://localhost:8000';
+
+const CompanyDetails = ({ username, password, navigate }) => {
+    const { companyId } = useParams();
+    const [company, setCompany] = useState(null);
     const [activeTab, setActiveTab] = useState(0);
+    const [tabs, setTabs] = useState([]);
+
+    useEffect(() => {
+        const fetchCompanyDetails = async () => {
+            try {
+                const response = await axios.get(`${API_BASE_URL}/admin/companies/${companyId}`, {
+                    auth: {
+                        username: username,
+                        password: password,
+                    },
+                });
+                setCompany(response.data);
+            } catch (error) {
+                console.error('Error fetching company details:', error);
+            }
+        };
+
+        fetchCompanyDetails();
+    }, [companyId, username, password]);
+
+    useEffect(() => {
+        if (company) {
+            const newTabs = [
+                { label: 'About Us', content: renderAboutUs() },
+            ];
+
+            if (company.assessment) {
+                newTabs.push({ label: 'Careers', content: renderAssessment() });
+            }
+            if (company.portfolio) {
+                newTabs.push({ label: 'Portfolio', content: renderPortfolio() });
+            }
+            if (company.investors) {
+                newTabs.push({ label: 'Investors', content: renderInvestors() });
+            }
+            
+            if (company.transformation_plan) {
+                newTabs.push({ label: 'Assesment', content: renderTransformationPlan() });
+            }
+
+            if (company.dynamicSections && company.dynamicSections.length > 0) {
+                company.dynamicSections.forEach((section) => {
+                    newTabs.push({ label: section.key, content: renderDynamicSection(section) });
+                });
+            }
+
+            setTabs(newTabs);
+        }
+    }, [company]);
 
     const handleTabChange = (event, newValue) => {
         setActiveTab(newValue);
     };
 
-    if (selectedCompany) {
+    const renderAboutUs = () => {
+        return (
+            <>
+                <Typography variant="h5" component="div" sx={{ mt: 3, mb: 1 }}>
+                    About Us
+                </Typography>
+                <Typography variant="body1" sx={{ mb: 2 }} dangerouslySetInnerHTML={{ __html: company.description }} />
+
+                <Typography variant="h5" component="div" sx={{ mt: 3, mb: 1 }}>
+                    Key Information
+                </Typography>
+                <Grid container spacing={2}>
+                    <Grid item xs={12} sm={6}>
+                        <Typography variant="body1">Category: {company.category}</Typography>
+                        <Typography variant="body1">Size: {company.size}</Typography>
+                        <Typography variant="body1">Founded: {new Date(company.founded).toLocaleDateString()}</Typography>
+                        <Typography variant="body1">Headquarters: {company.headquarters}</Typography>
+                    </Grid>
+                    <Grid item xs={12} sm={6}>
+                        <Typography variant="body1">Location: {company.location}</Typography>
+                        <Typography variant="body1">Employees: {company.employees}</Typography>
+                        <Typography variant="body1">Mission: <span dangerouslySetInnerHTML={{ __html: company.mission }} /></Typography>
+                        <Typography variant="body1">Values: {company.company_values.join(', ')}</Typography>
+                    </Grid>
+                </Grid>
+
+                <Typography variant="h5" component="div" sx={{ mt: 3, mb: 1 }}>
+                    Financial Highlights
+                </Typography>
+                <Grid container spacing={2}>
+                    {company.financialStatement?.map((item, index) => (
+                        <Grid item xs={12} sm={6} key={index}>
+                            <Typography variant="body1">{item.key}: <span dangerouslySetInnerHTML={{__html: item.value}} /></Typography>
+                            {item.file && <Typography variant="body2"><a href={item.file.file_url} target="_blank" rel="noopener noreferrer">{item.file.filename}</a></Typography>}
+                        </Grid>
+                    ))}
+                </Grid>
+            </>
+        );
+    };
+
+    const renderPortfolio = () => {
+        return (
+            <>
+                <Typography variant="h5" component="div" sx={{ mt: 3, mb: 1 }}>
+                    Portfolio
+                </Typography>
+                {company.portfolio.map((item, index) => (
+                    <div key={index}>
+                        <Typography variant="h6" component="div">{item.key}</Typography>
+                        <Typography variant="body1" dangerouslySetInnerHTML={{__html: item.value}} />
+                        {item.file && <Typography variant="body2"><a href={item.file.file_url} target="_blank" rel="noopener noreferrer">{item.file.filename}</a></Typography>}
+                    </div>
+                ))}
+            </>
+        );
+    };
+
+    const renderInvestors = () => {
+        return (
+            <>
+                <Typography variant="h5" component="div" sx={{ mt: 3, mb: 1 }}>
+                    Investors
+                </Typography>
+                {company.investors.map((item, index) => (
+                    <div key={index}>
+                        <Typography variant="h6" component="div">{item.key}</Typography>
+                        <Typography variant="body1" dangerouslySetInnerHTML={{__html: item.value}} />
+                        {item.file && <Typography variant="body2"><a href={item.file.file_url} target="_blank" rel="noopener noreferrer">{item.file.filename}</a></Typography>}
+
+                    </div>
+                ))}
+            </>
+        );
+    };
+
+    const renderAssessment = () => {
+        return (
+            <>
+                <Typography variant="h5" component="div" sx={{ mt: 3, mb: 1 }}>
+                    Careers
+                </Typography>
+                {company.assessment.map((item, index) => (
+                    <div key={index}>
+                        <Typography variant="h6" component="div">{item.key}</Typography>
+                        <Typography variant="body1" dangerouslySetInnerHTML={{__html: item.value}} />
+                        {item.file && <Typography variant="body2"><a href={item.file.file_url} target="_blank" rel="noopener noreferrer">{item.file.filename}</a></Typography>}
+                    </div>
+                ))}
+            </>
+        );
+    };
+
+    const renderTransformationPlan = () => {
+        return (
+            <>
+                <Typography variant="h5" component="div" sx={{ mt: 3, mb: 1 }}>
+                    Assessment
+                </Typography>
+                {company.transformation_plan.map((item, index) => (
+                    <div key={index}>
+                        <Typography variant="h6" component="div">{item.key}</Typography>
+                        <Typography variant="body1" dangerouslySetInnerHTML={{__html: item.value}} />
+                        {item.file && <Typography variant="body2"><a href={item.file.file_url} target="_blank" rel="noopener noreferrer">{item.file.filename}</a></Typography>}
+                    </div>
+                ))}
+            </>
+        );
+    };
+
+    const renderDynamicSection = (section) => {
+        return (
+            <>
+                <Typography variant="h5" component="div" sx={{ mt: 3, mb: 1 }}>
+                    {section.key}
+                </Typography>
+                {section.value.map((item, index) => (
+                    <div key={index}>
+                        <Typography variant="h6" component="div">{item.key}</Typography>
+                        <Typography variant="body1" dangerouslySetInnerHTML={{__html: item.value}} />
+                        {item.file && <Typography variant="body2"><a href={item.file.file_url} target="_blank" rel="noopener noreferrer">{item.file.filename}</a></Typography>}
+                    </div>
+                ))}
+            </>
+        );
+    };
+
+    if (company) {
         return (
             <Container maxWidth="md" sx={{ mt: 4 }}>
-                <Button variant="outlined" onClick={handleBack} sx={{ mb: 2 }}>
+                <Button variant="outlined" onClick={() => navigate('/directory')} sx={{ mb: 2 }}>
                     Back to Directory
                 </Button>
                 <Paper elevation={3} sx={{ p: 3, borderRadius: 2 }}>
@@ -37,17 +219,17 @@ const CompanyDetails = ({ selectedCompany, handleBack }) => {
                         <CardMedia
                             component="img"
                             sx={{ width: 150, height: 150, objectFit: 'contain', mb: 1 }}
-                            image={selectedCompany.logo}
-                            alt={selectedCompany.name}
+                            image={company.logo}
+                            alt={company.name}
                         />
                         <Typography variant="h3" component="div">
-                            {selectedCompany.name}
+                            {company.name}
                         </Typography>
                         <Typography variant="subtitle1" color="text.secondary">
                             Innovating for a Better Future
                         </Typography>
                         <Button
-                            href={selectedCompany.website}
+                            href={company.website}
                             target="_blank"
                             rel="noopener noreferrer"
                             variant="contained"
@@ -58,143 +240,12 @@ const CompanyDetails = ({ selectedCompany, handleBack }) => {
                     </Box>
 
                     <Tabs value={activeTab} onChange={handleTabChange} aria-label="company tabs">
-                        <Tab label="About Us" />
-                        <Tab label="Portfolio" />
-                        <Tab label="Investors" />
-                        <Tab label="Assessment" />
-                        <Tab label="Transformation Plan" />
+                        {tabs.map((tab, index) => (
+                            <Tab key={index} label={tab.label} />
+                        ))}
                     </Tabs>
 
-                    {activeTab === 0 && (
-                        <>
-                            <Typography variant="h5" component="div" sx={{ mt: 3, mb: 1 }}>
-                                About Us
-                            </Typography>
-                            <Typography variant="body1" sx={{ mb: 2 }}>
-                                {selectedCompany.description}
-                            </Typography>
-
-                            <Typography variant="h5" component="div" sx={{ mt: 3, mb: 1 }}>
-                                Key Information
-                            </Typography>
-                            <Grid container spacing={2}>
-                                <Grid item xs={12} sm={6}>
-                                    <Typography variant="body1">Category: {selectedCompany.category}</Typography>
-                                    <Typography variant="body1">Size: {selectedCompany.size}</Typography>
-                                    <Typography variant="body1">Founded: {new Date(selectedCompany.founded).toLocaleDateString()}</Typography>
-                                    <Typography variant="body1">Headquarters: {selectedCompany.headquarters}</Typography>
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <Typography variant="body1">Location: {selectedCompany.location}</Typography>
-                                    <Typography variant="body1">Employees: {selectedCompany.employees}</Typography>
-                                    <Typography variant="body1">Mission: {selectedCompany.mission}</Typography>
-                                    <Typography variant="body1">Values: {selectedCompany.company_values.join(', ')}</Typography>
-                                </Grid>
-                            </Grid>
-
-                            <Typography variant="h5" component="div" sx={{ mt: 3, mb: 1 }}>
-                                Financial Highlights
-                            </Typography>
-                            <Grid container spacing={2}>
-                                <Grid item xs={12} sm={6}>
-                                    <Typography variant="body1">Revenue: ${selectedCompany.financialStatement.revenue}</Typography>
-                                    <Typography variant="body1">Profit: ${selectedCompany.financialStatement.profit}</Typography>
-                                </Grid>
-                                <Grid item xs={12} sm={6}>
-                                    <Typography variant="body1">Assets: ${selectedCompany.financialStatement.assets}</Typography>
-                                    <Typography variant="body1">Liabilities: ${selectedCompany.financialStatement.liabilities}</Typography>
-                                </Grid>
-                            </Grid>
-                        </>
-                    )}
-
-                    {activeTab === 2 && (
-                        <>
-                            <Typography variant="h5" component="div" sx={{ mt: 3, mb: 1 }}>
-                                Investors
-                            </Typography>
-                            <Typography variant="body1" sx={{ mb: 2 }}>
-                                {selectedCompany.investors?.summary} {/* Use optional chaining */}
-                            </Typography>
-                            {selectedCompany.investors && ( // conditionally render the list if investors exists
-                                <ul>
-                                    <li><a href={selectedCompany.investors.annual_report}>Annual Report</a></li>
-                                    <li><a href={selectedCompany.investors.financial_results}>Financial Results</a></li>
-                                    <li><a href={selectedCompany.investors.presentations}>Investor Presentations</a></li>
-                                </ul>
-                            )}
-                            <Typography variant="body1">Contact: <a href={`mailto:${selectedCompany.investors?.contact}`}>{selectedCompany.investors?.contact}</a></Typography>
-                        </>
-                    )}
-
-                    {activeTab === 3 && (
-                        <>
-                            <Typography variant="h5" component="div" sx={{ mt: 3, mb: 1 }}>
-                                Assessment
-                            </Typography>
-                            <Typography variant="body1" sx={{ mb: 2 }}>
-                                {selectedCompany.assessment?.summary} {/* Use optional chaining */}
-                            </Typography>
-                            {selectedCompany.assessment && ( // conditionally render the list if assessment exists
-                                <ul>
-                                    <li><a href={selectedCompany.assessment.sustainability_report}>Sustainability Report</a></li>
-                                    <li><a href={selectedCompany.assessment.customer_satisfaction_report}>Customer Satisfaction Report</a></li>
-                                </ul>
-                            )}
-                        </>
-                    )}
-
-                    {activeTab === 1 && (
-                        <>
-                            <Typography variant="h5" component="div" sx={{ mt: 3, mb: 1 }}>
-                                Portfolio
-                            </Typography>
-                            <Typography variant="body1" sx={{ mb: 2 }}>
-                                {selectedCompany.portfolio?.summary}
-                            </Typography>
-                            {selectedCompany.portfolio && (
-                                <>
-                                    <Typography variant="h6">Projects</Typography>
-                                    <ul>
-                                        {selectedCompany.portfolio.projects?.map((project, index) => (
-                                            <li key={index}><a href={project.link}>{project.name}</a></li>
-                                        ))}
-                                    </ul>
-                                    <Typography variant="h6">Client Stories</Typography>
-                                    <ul>
-                                        {selectedCompany.portfolio.client_stories?.map((story, index) => (
-                                            <li key={index}><a href={story.link}>{story.client}</a></li>
-                                        ))}
-                                    </ul>
-                                    <Typography variant="body1"><a href={selectedCompany.portfolio.complete_portfolio}>View Complete Portfolio</a></Typography>
-                                </>
-                            )}
-                        </>
-                    )}
-
-                    {activeTab === 4 && (
-                        <>
-                            <Typography variant="h5" component="div" sx={{ mt: 3, mb: 1 }}>
-                                Transformation Plan
-                            </Typography>
-                            <Typography variant="body1" sx={{ mb: 2 }}>
-                                {selectedCompany.transformation_plan?.summary}
-                            </Typography>
-                            {selectedCompany.transformation_plan && (
-                                <>
-                                    <Typography variant="h6">Planning</Typography>
-                                    <Typography variant="body1">{selectedCompany.transformation_plan.planning}</Typography>
-                                    <Typography variant="h6">Execution</Typography>
-                                    <Typography variant="body1">{selectedCompany.transformation_plan.execution}</Typography>
-                                    <Typography variant="h6">Monitoring</Typography>
-                                    <Typography variant="body1">{selectedCompany.transformation_plan.monitoring}</Typography>
-                                    <Typography variant="h6">Release</Typography>
-                                    <Typography variant="body1">{selectedCompany.transformation_plan.release}</Typography>
-                                    <Typography variant="body1"><a href={selectedCompany.transformation_plan.document}>Transformation Plan Document</a></Typography>
-                                </>
-                            )}
-                        </>
-                    )}
+                    {tabs[activeTab]?.content}
 
                     <Box sx={{ textAlign: 'center', mt: 4 }}>
                         <Button variant="contained" color="primary" size="large">
