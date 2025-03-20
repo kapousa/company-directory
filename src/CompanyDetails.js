@@ -212,7 +212,7 @@ const CompanyDetails = ({ username, password, navigate }) => {
         ))}
       </>
     );
-  }, [company]);
+  }, []);
 
   useEffect(() => {
     if (company) {
