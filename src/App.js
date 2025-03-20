@@ -20,7 +20,7 @@ import LandingPage from './LandingPage';
 import axios from 'axios';
 import CompanyDetails from './CompanyDetails';
 
-const API_BASE_URL = 'http://127.0.0.1:8000';
+const API_BASE_URL = 'https://admin-backend-1sev.onrender.com';
 
 const categories = [
   'Technology',
@@ -129,7 +129,7 @@ function App() {
               <>
               <Link to="/" style={{ textDecoration: 'none' }}>
                   <Button variant="outlined" sx={{ mb: 2 }}>
-                    Go to Landing Page
+                    Home
                   </Button>
                 </Link>
                 <Typography variant="h4" component="h1" gutterBottom>
