@@ -1,5 +1,5 @@
 // App.js
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Container,
   TextField,
@@ -24,35 +24,31 @@ const API_BASE_URL = 'https://admin-backend-1sev.onrender.com';
 
 const categories = [
   'Technology',
-    'Retail',
-    'Health Care',
-    'Finance',
-    'Manufacturing',
-    'Education',
-    'Hospitality',
-    'Transportation',
-    'Energy',
-    'Agriculture',
+  'Retail',
+  'Health Care',
+  'Finance',
+  'Manufacturing',
+  'Education',
+  'Hospitality',
+  'Transportation',
+  'Energy',
+  'Agriculture',
 ];
 
-const sizes = [
-  'Large',
-  'Medium',
-  'Small',
-]
+const sizes = ['Large', 'Medium', 'Small'];
 
 const locations = [
   'London, China',
-    'Madrid, Japan',
-    'London, France',
-    'Berlin, Japan',
-    'Berlin, Netherlands',
-    'Sydney, Canada',
-    'Sydney, Germany',
-    'New York, Sweden',
-    'Paris, Spain',
-    'Amsterdam, China',
-]
+  'Madrid, Japan',
+  'London, France',
+  'Berlin, Japan',
+  'Berlin, Netherlands',
+  'Sydney, Canada',
+  'Sydney, Germany',
+  'New York, Sweden',
+  'Paris, Spain',
+  'Amsterdam, China',
+];
 
 function App() {
   const [searchTerm, setSearchTerm] = useState('');
@@ -68,7 +64,7 @@ function App() {
   const username = 'admin';
   const password = 'password';
 
-  const fetchData = async (pageToLoad) => {
+  const fetchData = useCallback(async (pageToLoad) => {
     setLoading(true);
     try {
       const response = await axios.get(`${API_BASE_URL}/admin/companies/`, {
@@ -92,25 +88,23 @@ function App() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [searchTerm, filterCategory, filterSize, filterLocation]);
 
   useEffect(() => {
     setPage(1);
     fetchData(1);
-  }, [searchTerm, filterCategory, filterSize, filterLocation]);
+  }, [fetchData]);
 
   useEffect(() => {
     fetchData(page);
-  }, [page]);
+  }, [fetchData, page]);
 
   const handlePageChange = (event, value) => {
     setPage(value);
   };
 
-  // Wrapper component to pass navigate
   function CompanyDetailsWrapper() {
     const navigate = useNavigate();
-
     return (
       <Container maxWidth="md" sx={{ mt: 4 }}>
         <CompanyDetails username={username} password={password} navigate={navigate} />
@@ -127,7 +121,7 @@ function App() {
           element={
             <Container maxWidth="md" sx={{ mt: 4 }}>
               <>
-              <Link to="/" style={{ textDecoration: 'none' }}>
+                <Link to="/" style={{ textDecoration: 'none' }}>
                   <Button variant="outlined" sx={{ mb: 2 }}>
                     Home
                   </Button>
@@ -135,7 +129,6 @@ function App() {
                 <Typography variant="h4" component="h1" gutterBottom>
                   Company Directory
                 </Typography>
-
                 <Box sx={{ mb: 3 }}>
                   <TextField
                     label="Search companies..."
@@ -174,9 +167,8 @@ function App() {
                             {size}
                           </MenuItem>
                         ))}
-                        </Select>
-                      </Grid>
-                    
+                      </Select>
+                    </Grid>
                     <Grid item xs={12} sm={6} md={3}>
                       <Select
                         fullWidth
@@ -192,9 +184,8 @@ function App() {
                         ))}
                       </Select>
                     </Grid>
-                </Grid>
+                  </Grid>
                 </Box>
-
                 <Grid container spacing={3}>
                   {companiesData.map((company) => (
                     <Grid item xs={12} sm={6} md={4} key={company.id}>
@@ -231,7 +222,6 @@ function App() {
                     </Grid>
                   ))}
                 </Grid>
-
                 {totalCompanies > COMPANIES_PER_PAGE && (
                   <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
                     <Pagination
@@ -242,7 +232,6 @@ function App() {
                     />
                   </Box>
                 )}
-
                 {loading && (
                   <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
                     <CircularProgress />
@@ -252,10 +241,7 @@ function App() {
             </Container>
           }
         />
-        <Route
-          path="/company/:companyId"
-          element={<CompanyDetailsWrapper />}
-        />
+        <Route path="/company/:companyId" element={<CompanyDetailsWrapper />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
     </Router>
